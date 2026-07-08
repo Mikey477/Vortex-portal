@@ -29,7 +29,7 @@ canvas {
   pointer-events: none !important;
 }
 
-/* Fix text overlay layout rendering stack */
+/* Base structural layout for full screen overlay panels */
 .overlay-container {
   position: absolute;
   top: 0;
@@ -70,6 +70,7 @@ canvas {
   color: #ff007f;
   margin-bottom: 35px;
 }
+
 .vertical-button-box {
   display: flex;
   flex-direction: column;
@@ -158,6 +159,7 @@ canvas {
 .alert-box { border-color: #ff007f; }
 .alert-title { color: #ff007f; font-size: 1.6rem; letter-spacing: 3px; margin-bottom: 10px; }
 .final-score-box { margin: 20px 0; font-size: 1.1rem; color: #00ffcc; font-weight: bold; }
+
 #gameHud {
   position: absolute;
   top: 0;
