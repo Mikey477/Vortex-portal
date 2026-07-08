@@ -9,8 +9,7 @@ body, html {
   height: 100%;
   background: #020205;
   overflow: hidden;
-  font-family: 'Courier New', Courier, monospace;
-  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   user-select: none;
 }
 
@@ -23,157 +22,7 @@ canvas {
   z-index: 1;
 }
 
-/* Fullscreen Menu Screens */
-.menu-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 90;
-  background: rgba(3, 3, 8, 0.75);
-  backdrop-filter: blur(15px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.3s ease;
-}
-
-.menu-box {
-  background: rgba(10, 10, 22, 0.85);
-  border: 1px solid rgba(0, 255, 200, 0.3);
-  box-shadow: 0 0 50px rgba(0, 255, 200, 0.15);
-  border-radius: 24px;
-  padding: 50px;
-  text-align: center;
-  width: 450px;
-}
-
-.alert-box {
-  border-color: #ff0055;
-  box-shadow: 0 0 50px rgba(255, 0, 85, 0.2);
-}
-
-.glitch-title {
-  color: #00ffcc;
-  font-size: 2.8rem;
-  letter-spacing: 6px;
-  text-shadow: 0 0 15px rgba(0, 255, 200, 0.6);
-  margin-bottom: 5px;
-}
-
-.alert-title {
-  color: #ff0055;
-  font-size: 2.5rem;
-  letter-spacing: 4px;
-  text-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
-  margin-bottom: 15px;
-}
-
-.sub-title {
-  color: #ff007f;
-  font-size: 1.1rem;
-  letter-spacing: 4px;
-  margin-bottom: 40px;
-  text-transform: uppercase;
-}
-
-.menu-buttons, .menu-subview {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.vibe-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  padding: 14px 20px;
-  font-family: inherit;
-  font-size: 1rem;
-  letter-spacing: 2px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.vibe-btn:hover {
-  background: rgba(0, 255, 200, 0.15);
-  border-color: #00ffcc;
-  color: #00ffcc;
-  text-shadow: 0 0 10px #00ffcc;
-  transform: translateY(-2px);
-}
-
-.mode-opt.active {
-  background: rgba(255, 0, 127, 0.15);
-  border-color: #ff007f;
-  color: #ff007f;
-  text-shadow: 0 0 10px #ff007f;
-}
-
-.back-btn {
-  margin-top: 10px;
-  border-color: rgba(255, 0, 85, 0.3);
-  color: #ff0055;
-}
-
-.back-btn:hover {
-  background: rgba(255, 0, 85, 0.1);
-  border-color: #ff0055;
-  color: #ff0055;
-  text-shadow: 0 0 10px #ff0055;
-}
-
-.score-board {
-  text-align: left;
-  background: rgba(255,255,255,0.03);
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 0.95rem;
-}
-
-.score-board span {
-  color: #00ffcc;
-  font-weight: bold;
-}
-
-.score-display {
-  font-size: 1.3rem;
-  margin: 25px 0;
-  color: #00ffcc;
-}
-
-/* Heads Up Display Tracking */
-.game-hud {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 50;
-  display: flex;
-  gap: 25px;
-  background: rgba(5, 5, 12, 0.6);
-  padding: 15px 25px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.hud-stat {
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-}
-
-.hud-stat span {
-  color: #00ffcc;
-  font-weight: bold;
-}
-
-/* Gear Button */
+/* Gear Button Layout */
 .gear-btn {
   position: absolute;
   top: 20px;
@@ -187,26 +36,49 @@ canvas {
   border-radius: 50%;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  transition: transform 0.4s ease, background 0.2s;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
 .gear-btn:hover {
   transform: rotate(60deg) scale(1.1);
   background: rgba(255, 255, 255, 0.2);
+  border-color: #00ffcc;
 }
 
-/* Upgrade Dashboard Drawer */
+/* Overhauled Glass Dashboard Panel */
 .settings-panel {
   position: absolute;
   top: 20px;
   right: 20px;
   z-index: 101;
-  width: 340px;
-  background: rgba(8, 8, 16, 0.85);
+  width: 330px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(8, 8, 16, 0.82);
   backdrop-filter: blur(25px);
   border: 1px solid rgba(0, 255, 200, 0.2);
   border-radius: 20px;
   padding: 24px;
+  color: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform-origin: top right;
+}
+
+/* Custom Panel Scrollbar styling */
+.settings-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.settings-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 200, 0.3);
+  border-radius: 2px;
+}
+
+.settings-panel.hidden {
+  opacity: 0;
+  transform: scale(0.8) translate(20px, -20px);
+  pointer-events: none;
 }
 
 .panel-header {
@@ -219,9 +91,10 @@ canvas {
 }
 
 .panel-header h3 {
-  font-size: 11px;
-  letter-spacing: 2px;
+  font-size: 13px;
+  letter-spacing: 2.5px;
   color: #00ffcc;
+  text-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
 }
 
 .close-btn {
@@ -231,81 +104,92 @@ canvas {
   font-size: 26px;
   cursor: pointer;
   line-height: 1;
+  transition: color 0.2s;
 }
 
-.wallet-display {
-  background: rgba(0, 255, 200, 0.1);
-  border: 1px solid rgba(0, 255, 200, 0.2);
-  padding: 10px;
-  text-align: center;
-  border-radius: 8px;
-  color: #00ffcc;
-  font-weight: bold;
-  margin-bottom: 20px;
+.close-btn:hover {
+  color: #ff007f;
 }
 
-/* Upgrade Row Modules */
-.shop-item {
+.control-group {
+  margin-bottom: 18px;
+}
+
+.control-group label {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  background: rgba(255,255,255,0.02);
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 12px;
-  border: 1px solid rgba(255,255,255,0.05);
-}
-
-.item-info h4 {
-  font-size: 0.85rem;
+  font-size: 12px;
   color: #e2e8f0;
-  margin-bottom: 2px;
+  margin-bottom: 8px;
 }
 
-.item-info p {
-  font-size: 0.7rem;
-  color: #718096;
-  max-width: 180px;
+.control-group label span {
+  color: #00ffcc;
+  font-weight: 600;
 }
 
-.shop-btn {
-  background: #ff007f;
-  border: none;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: bold;
-  transition: opacity 0.2s;
-}
-
-.shop-btn:hover {
+.sub-hint {
+  display: block;
+  font-size: 10px;
+  color: #ff007f;
+  margin-top: 3px;
   opacity: 0.85;
 }
 
-.shop-btn.maxed {
-  background: #4a5568;
-  color: #a0aec0;
-  cursor: not-allowed;
+/* Slick Custom Dropdown Select */
+.custom-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+.custom-select option {
+  background: #0a0a14;
+  color: #fff;
 }
 
-.line-toggle-wrapper {
-  margin-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 15px;
+/* Neon Sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
 }
 
-/* iOS Toggle Framework */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00ffcc;
+  cursor: pointer;
+  box-shadow: 0 0 8px #00ffcc;
+}
+
+/* iOS Style Toggle Switch */
+.checkbox-group {
+  margin-top: 22px;
+  margin-bottom: 22px;
+}
 .toggle-container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-between !important;
   cursor: pointer;
-  font-size: 0.85rem;
+  position: relative;
 }
-.toggle-container input { opacity: 0; width: 0; height: 0; }
+.toggle-container input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
 .checkmark {
   position: relative;
   width: 40px;
@@ -325,7 +209,10 @@ canvas {
   border-radius: 50%;
   transition: .3s;
 }
-input:checked + .checkmark { background-color: #00ffcc; }
-input:checked + .checkmark:before { transform: translateX(18px); }
-
-.hidden { display: none !important; }
+input:checked + .checkmark {
+  background-color: #00ffcc;
+  box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
+}
+input:checked + .checkmark:before {
+  transform: translateX(18px);
+}
