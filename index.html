@@ -10,76 +10,62 @@
 
     <canvas id="vibeCanvas"></canvas>
 
-    <!-- UI HEADS UP DISPLAY (HUD) -->
-    <div id="gameHUD" class="game-hud hidden">
-        <div class="hud-item">SECTOR: <span id="hudSector">1</span></div>
-        <div class="hud-item">HARVESTED: <span id="hudScore">0</span> / <span id="hudTarget">500</span></div>
-        <div class="hud-item">DARK MATTER: <span id="hudDM">0</span> DM</div>
-        <div class="hud-item timer-item">TIME: <span id="hudTimer">0s</span></div>
+    <!-- HUD Overlay for Active Gameplay -->
+    <div id="gameHud" class="game-hud hidden">
+        <div class="hud-stat">SECTOR: <span id="hudSector">1</span></div>
+        <div class="hud-stat">OBJECTIVE: <span id="hudObjective">0 / 500</span></div>
+        <div class="hud-stat">DARK MATTER: <span id="hudDm">0</span> DM</div>
+        <div class="hud-stat" id="hudTimerContainer">TIME: <span id="hudTimer">0</span>s</div>
     </div>
 
     <!-- START MENU OVERLAY -->
     <div id="startMenu" class="menu-overlay">
         <div class="menu-box">
-            <h1 class="game-title">EVENT HORIZON</h1>
-            <p class="game-subtitle">QUANTUM HARVEST</p>
+            <h1 class="glitch-title">EVENT HORIZON</h1>
+            <h2 class="sub-title">Quantum Harvest</h2>
             
-            <div class="menu-buttons">
-                <button id="btnStart" class="menu-btn primary">START HARVEST</button>
-                <button id="btnMode" class="menu-btn">SELECT MODE</button>
-                <button id="btnLeader" class="menu-btn">LEADERBOARDS</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODE SELECTION PANEL -->
-    <div id="modePanel" class="menu-overlay hidden">
-        <div class="menu-box sub-panel">
-            <h2>SELECT SECTOR ANOMALY</h2>
-            
-            <div class="mode-card active" data-mode="standard">
-                <h3>Standard Sector</h3>
-                <p>Absorb target orbs to progress to deeper cosmic sectors. Classic stabilization physics.</p>
-            </div>
-            <div class="mode-card" data-mode="survival">
-                <h3>Gravity Well (Survival)</h3>
-                <p>The core continuously collapses and loses mass! Feed the core to stay alive as long as possible.</p>
-            </div>
-            <div class="mode-card" data-mode="chaos">
-                <h3>Chaos Storm (Sandbox)</h3>
-                <p>Double quantum particle limits. Random gravity-inverting solar flares warp orbits every 10 seconds.</p>
+            <div class="menu-buttons" id="mainMenuButtons">
+                <button class="vibe-btn" id="btnStartGame">START GAME</button>
+                <button class="vibe-btn" id="btnSelectMode">SELECT MODE</button>
+                <button class="vibe-btn" id="btnLeaderboard">LEADERBOARDS</button>
             </div>
 
-            <button id="btnModeBack" class="menu-btn secondary">BACK TO MENU</button>
-        </div>
-    </div>
-
-    <!-- LEADERBOARDS PANEL -->
-    <div id="leaderPanel" class="menu-overlay hidden">
-        <div class="menu-box sub-panel">
-            <h2>LOCAL LOGGED SCORES</h2>
-            <div class="scores-list">
-                <div class="score-row"><span>Standard High Sector:</span> <span id="highStandard">Sector 1</span></div>
-                <div class="score-row"><span>Survival Max Time:</span> <span id="highSurvival">0s</span></div>
-                <div class="score-row"><span>Chaos Storm Max Points:</span> <span id="highChaos">0 pts</span></div>
+            <!-- Mode Selection Sub-View -->
+            <div class="menu-subview hidden" id="modeView">
+                <h3>CHOOSE TIMELINE</h3>
+                <button class="vibe-btn mode-opt active" data-mode="standard">Standard Sector (Progression)</button>
+                <button class="vibe-btn mode-opt" data-mode="survival">Gravity Well (Survival)</button>
+                <button class="vibe-btn mode-opt" data-mode="chaos">Chaos Storm (Score Attack)</button>
+                <button class="vibe-btn back-btn" id="btnBackFromMode">BACK</button>
             </div>
-            <button id="btnLeaderBack" class="menu-btn secondary">BACK TO MENU</button>
+
+            <!-- Leaderboard Sub-View -->
+            <div class="menu-subview hidden" id="leaderboardView">
+                <h3>LOCAL HIGH SCORES</h3>
+                <div class="score-board">
+                    <p>Standard Max Sector: <span id="scoreStandard">1</span></p>
+                    <p>Gravity Well Best Survival: <span id="scoreSurvival">0</span>s</p>
+                    <p>Chaos Storm Best Harvest: <span id="scoreChaos">0</span> DM</p>
+                </div>
+                <button class="vibe-btn back-btn" id="btnBackFromLeader">BACK</button>
+            </div>
         </div>
     </div>
 
     <!-- GAME OVER OVERLAY -->
-    <div id="gameOverPanel" class="menu-overlay hidden">
-        <div class="menu-box collapsed">
+    <div id="gameOverMenu" class="menu-overlay hidden">
+        <div class="menu-box alert-box">
             <h1 class="alert-title">CORE COLLAPSE</h1>
-            <p id="gameOverReason">The event horizon collapsed into a supernova.</p>
-            <p class="stats-review">Final Score: <span id="finalScore">0</span></p>
-            <button id="btnRestart" class="menu-btn primary">RE-STABILIZE CORE</button>
+            <p id="gameOverReason">The core shrank to zero mass and went supernova.</p>
+            <div class="score-display">Final Score: <span id="finalScoreVal">0</span></div>
+            <button class="vibe-btn" id="btnReturnToMenu">RETURN TO MENU</button>
         </div>
     </div>
 
-    <!-- UPGRADE SHOP SIDEBAR -->
+    <!-- Glassmorphic Gear Menu Button for Upgrades -->
     <button id="settingsBtn" class="gear-btn" title="Open Upgrades">⚙️</button>
-    
+
+    <!-- Upgrade Dashboard Sidebar Panel -->
     <div id="settingsPanel" class="settings-panel hidden">
         <div class="panel-header">
             <h3>QUANTUM UPGRADE SHOP</h3>
@@ -87,46 +73,38 @@
         </div>
         
         <div class="panel-body">
-            <div class="wallet-display">AVAILABLE BALANCE: <span id="shopDM">0</span> DM</div>
+            <div class="wallet-display">Available: <span id="shopDmWallet">0</span> DM</div>
             
             <!-- Upgrade Item 1 -->
             <div class="shop-item">
-                <div class="shop-item-info">
-                    <h4>Gravitational Pull (+10% Velocity)</h4>
-                    <p>Sucks orbs inward faster toward the center event horizon core.</p>
+                <div class="item-info">
+                    <h4>Gravitational Pull</h4>
+                    <p>Increases ball velocity toward cursor (+10% speed)</p>
                 </div>
-                <button id="buyGrav" class="buy-btn" data-cost="50">50 DM</button>
+                <button class="shop-btn" id="upgGrav">50 DM</button>
             </div>
 
             <!-- Upgrade Item 2 -->
             <div class="shop-item">
-                <div class="shop-item-info">
-                    <h4>Matter Replication (+5 Max Orbs)</h4>
-                    <p>Increases your max quantum particle concentration limits.</p>
+                <div class="item-info">
+                    <h4>Matter Replication</h4>
+                    <p>Increases max particle ceiling (+5 max balls)</p>
                 </div>
-                <button id="buyMax" class="buy-btn" data-cost="100">100 DM</button>
+                <button class="shop-btn" id="upgBalls">100 DM</button>
             </div>
 
             <!-- Upgrade Item 3 -->
             <div class="shop-item">
-                <div class="shop-item-info">
-                    <h4>Shockwave Overdrive (+20% Radius)</h4>
-                    <p>Amplifies left-click blast waves to redirect nodes further away.</p>
+                <div class="item-info">
+                    <h4>Shockwave Overdrive</h4>
+                    <p>Expands context blast mechanics radius (+20% size)</p>
                 </div>
-                <button id="buyShock" class="buy-btn" data-cost="150">150 DM</button>
+                <button class="shop-btn" id="upgPulse">150 DM</button>
             </div>
 
-            <div class="divider"></div>
-
-            <!-- Visual Settings Block -->
-            <div class="control-group">
-                <label for="trailLength">Motion Blur Trails: <span id="valTrails">Long</span></label>
-                <input type="range" id="trailLength" min="0.05" max="0.5" step="0.05" value="0.2">
-            </div>
-
-            <div class="control-group checkbox-group">
+            <div class="control-group line-toggle-wrapper">
                 <label class="toggle-container">
-                    <span>Laser Topology Connectors</span>
+                    <span>Laser Web Connectors</span>
                     <input type="checkbox" id="toggleLines">
                     <span class="checkmark"></span>
                 </label>
