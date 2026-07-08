@@ -7,10 +7,11 @@
 body, html {
   width: 100%;
   height: 100%;
-  background: #020205;
+  background: #010103;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   user-select: none;
+  color: #fff;
 }
 
 canvas {
@@ -22,7 +23,201 @@ canvas {
   z-index: 1;
 }
 
-/* Gear Button Layout */
+/* ARCADE HUD HEADS UP DISPLAY */
+.game-hud {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 50;
+  display: flex;
+  gap: 25px;
+  background: rgba(4, 4, 12, 0.65);
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 200, 0.15);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.game-hud.hidden { opacity: 0; }
+
+.hud-item {
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #8a99ad;
+}
+
+.hud-item span {
+  color: #00ffcc;
+  text-shadow: 0 0 8px rgba(0, 255, 200, 0.4);
+}
+
+/* MENUS CENTRAL BOX WRAPPERS */
+.menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 90;
+  background: rgba(2, 2, 6, 0.75);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+.menu-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.menu-box {
+  background: rgba(10, 10, 22, 0.85);
+  border: 1px solid rgba(0, 255, 200, 0.25);
+  border-radius: 24px;
+  padding: 50px 70px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0, 255, 200, 0.05);
+  max-width: 500px;
+  width: 90%;
+}
+
+.sub-panel {
+  padding: 35px 40px;
+  max-width: 550px;
+}
+
+.game-title {
+  font-size: 3.2rem;
+  letter-spacing: 8px;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255,255,255,0.2);
+  margin-bottom: 5px;
+  font-weight: 900;
+}
+
+.game-subtitle {
+  color: #00ffcc;
+  font-size: 1.1rem;
+  letter-spacing: 5px;
+  font-weight: bold;
+  margin-bottom: 40px;
+  text-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
+}
+
+.menu-box h2 {
+  font-size: 1.4rem;
+  letter-spacing: 3px;
+  color: #00ffcc;
+  margin-bottom: 25px;
+}
+
+/* BUTTONS CONFIG */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.menu-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 14px 28px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.menu-btn.primary {
+  background: #00ffcc;
+  color: #020205;
+  border-color: #00ffcc;
+  box-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
+}
+
+.menu-btn.primary:hover {
+  background: #00e6b8;
+  box-shadow: 0 0 25px rgba(0, 255, 200, 0.5);
+}
+
+.menu-btn.secondary {
+  margin-top: 20px;
+  font-size: 11px;
+  padding: 10px 20px;
+}
+
+/* SECTOR MODE SELECTION CARDS */
+.mode-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-card h3 {
+  font-size: 14px;
+  margin-bottom: 5px;
+  color: #e2e8f0;
+}
+
+.mode-card p {
+  font-size: 11px;
+  color: #718096;
+  line-height: 1.4;
+}
+
+.mode-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mode-card.active {
+  border-color: #00ffcc;
+  background: rgba(0, 255, 200, 0.04);
+}
+
+.mode-card.active h3 { color: #00ffcc; }
+
+/* LEADERBOARD SCORES STRUCTURE */
+.scores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  border-left: 3px solid #ff007f;
+}
+
+.score-row span:last-child {
+  color: #00ffcc;
+  font-weight: bold;
+}
+
+/* QUANTUM SHOP SIDEBAR SYSTEM */
 .gear-btn {
   position: absolute;
   top: 20px;
@@ -36,48 +231,32 @@ canvas {
   border-radius: 50%;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: transform 0.3s ease;
 }
 
-.gear-btn:hover {
-  transform: rotate(60deg) scale(1.1);
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #00ffcc;
-}
+.gear-btn:hover { transform: rotate(45deg); border-color: #00ffcc; }
 
-/* Overhauled Glass Dashboard Panel */
 .settings-panel {
   position: absolute;
   top: 20px;
   right: 20px;
   z-index: 101;
-  width: 330px;
+  width: 340px;
   max-height: calc(100vh - 40px);
   overflow-y: auto;
-  background: rgba(8, 8, 16, 0.82);
+  background: rgba(6, 6, 14, 0.88);
   backdrop-filter: blur(25px);
   border: 1px solid rgba(0, 255, 200, 0.2);
   border-radius: 20px;
   padding: 24px;
-  color: #fff;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: opacity 0.25s, transform 0.25s ease;
   transform-origin: top right;
-}
-
-/* Custom Panel Scrollbar styling */
-.settings-panel::-webkit-scrollbar {
-  width: 4px;
-}
-.settings-panel::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 200, 0.3);
-  border-radius: 2px;
 }
 
 .settings-panel.hidden {
   opacity: 0;
-  transform: scale(0.8) translate(20px, -20px);
+  transform: scale(0.9) translate(20px, -20px);
   pointer-events: none;
 }
 
@@ -87,132 +266,88 @@ canvas {
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 12px;
+  margin-bottom: 15px;
+}
+
+.panel-header h3 { font-size: 12px; letter-spacing: 2px; color: #00ffcc; }
+
+.close-btn { background: none; border: none; color: #a0aec0; font-size: 26px; cursor: pointer; line-height: 1; }
+.close-btn:hover { color: #ff007f; }
+
+.wallet-display {
+  background: rgba(0, 255, 200, 0.08);
+  border: 1px solid rgba(0, 255, 200, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #00ffcc;
   margin-bottom: 20px;
 }
 
-.panel-header h3 {
-  font-size: 13px;
-  letter-spacing: 2.5px;
-  color: #00ffcc;
-  text-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #a0aec0;
-  font-size: 26px;
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #ff007f;
-}
-
-.control-group {
-  margin-bottom: 18px;
-}
-
-.control-group label {
+/* UPGRADE ITEM BUTTON BLOCKS */
+.shop-item {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #e2e8f0;
-  margin-bottom: 8px;
-}
-
-.control-group label span {
-  color: #00ffcc;
-  font-weight: 600;
-}
-
-.sub-hint {
-  display: block;
-  font-size: 10px;
-  color: #ff007f;
-  margin-top: 3px;
-  opacity: 0.85;
-}
-
-/* Slick Custom Dropdown Select */
-.custom-select {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  outline: none;
-  cursor: pointer;
-}
-.custom-select option {
-  background: #0a0a14;
-  color: #fff;
-}
-
-/* Neon Sliders */
-input[type="range"] {
-  -webkit-appearance: none;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  height: 6px;
-  border-radius: 3px;
-  outline: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #00ffcc;
-  cursor: pointer;
-  box-shadow: 0 0 8px #00ffcc;
-}
-
-/* iOS Style Toggle Switch */
-.checkbox-group {
-  margin-top: 22px;
-  margin-bottom: 22px;
-}
-.toggle-container {
-  display: flex;
   align-items: center;
-  justify-content: space-between !important;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.shop-item-info h4 { font-size: 12px; color: #edf2f7; margin-bottom: 3px; }
+.shop-item-info p { font-size: 10px; color: #718096; line-height: 1.3; }
+
+.buy-btn {
+  background: rgba(0, 255, 200, 0.15);
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
+  padding: 8px 14px;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 8px;
   cursor: pointer;
-  position: relative;
+  white-space: nowrap;
+  transition: all 0.2s;
 }
-.toggle-container input {
-  opacity: 0;
-  width: 0;
-  height: 0;
+
+.buy-btn:hover:not(:disabled) {
+  background: #00ffcc;
+  color: #020205;
 }
-.checkmark {
-  position: relative;
-  width: 40px;
-  height: 22px;
-  background-color: rgba(255,255,255,0.1);
-  border-radius: 20px;
-  transition: .3s;
+
+.buy-btn:disabled {
+  border-color: rgba(255,255,255,0.1);
+  color: #4a5568;
+  background: rgba(255,255,255,0.02);
+  cursor: not-allowed;
 }
-.checkmark:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  border-radius: 50%;
-  transition: .3s;
-}
-input:checked + .checkmark {
-  background-color: #00ffcc;
-  box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
-}
-input:checked + .checkmark:before {
-  transform: translateX(18px);
+
+.divider { height: 1px; background: rgba(255,255,255,0.08); margin: 20px 0; }
+
+.control-group { margin-bottom: 15px; }
+.control-group label { display: flex; justify-content: space-between; font-size: 11px; color: #cbd5e0; margin-bottom: 6px; }
+.control-group label span { color: #00ffcc; font-weight: bold; }
+
+input[type="range"] { -webkit-appearance: none; width: 100%; background: rgba(255,255,255,0.08); height: 4px; border-radius: 2px; outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #00ffcc; cursor: pointer; }
+
+/* CHECKBOX SYSTEM STYLE */
+.checkbox-group { margin-top: 15px; }
+.toggle-container { display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+.toggle-container input { opacity: 0; width: 0; height: 0; }
+.checkmark { position: relative; width: 36px; height: 18px; background-color: rgba(255,255,255,0.1); border-radius: 20px; transition: .2s; }
+.checkmark:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: .2s; }
+input:checked + .checkmark { background-color: #00ffcc; }
+input:checked + .checkmark:before { transform: translateX(18px); }
+
+.alert-title { color: #ff007f; font-size: 2.2rem; font-weight: 900; letter-spacing: 4px; text-shadow: 0 0 15px rgba(255, 0, 127, 0.4); margin-bottom: 10px; }
+.stats-review { margin-top: 15px; margin-bottom: 25px; font-size: 14px; color: #a0aec0; }
+.stats-review span { color: #00ffcc; font-weight: bold; }
+
 }
