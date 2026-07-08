@@ -1,72 +1,108 @@
 <canvas id="vibeCanvas"></canvas>
 
-<!-- Glassmorphism Gear Menu Button -->
-<button id="settingsBtn" class="gear-btn" title="Open Settings">⚙️</button>
-
-<!-- Upgraded Settings Dashboard -->
-<div id="settingsPanel" class="settings-panel hidden">
-  <div class="panel-header">
-    <h3>SWARM QUANTUM ENGINE</h3>
-    <button id="closeBtn" class="close-btn">&times;</button>
-  </div>
-  
-  <div class="panel-body">
-    <!-- Ball Number -->
-    <div class="control-group">
-      <label for="ballNumber">Ball Count: <span id="valCount">400</span></label>
-      <input type="range" id="ballNumber" min="10" max="1200" step="10" value="400">
+<!-- ================= START MENU OVERLAY ================= -->
+<div id="startMenu" class="overlay-container">
+  <div class="menu-box glassmorphism animate-fade-in">
+    <h1 class="game-title">EVENT HORIZON</h1>
+    <h2 class="game-subtitle">QUANTUM HARVEST</h2>
+    
+    <div id="mainMenuButtons" class="vertical-button-box">
+      <button id="startGameBtn" class="neon-btn btn-cyan">START GAME</button>
+      <button id="selectModeBtn" class="neon-btn btn-magenta">SELECT MODE</button>
+      <button id="leaderboardsBtn" class="neon-btn btn-purple">LEADERBOARDS</button>
     </div>
 
-    <!-- Particle Radius Size -->
-    <div class="control-group">
-      <label for="ballSize">Ball Size Radius: <span id="valSize">2.0px</span></label>
-      <input type="range" id="ballSize" min="0.5" max="12" step="0.5" value="2">
+    <!-- Mode Selection Sub-View -->
+    <div id="modeView" class="sub-view hidden">
+      <h3>CHOOSE INSTABILITY PROFILE</h3>
+      <div class="mode-card-container">
+        <button id="modeStandardBtn" class="mode-card active">
+          <h4>Standard Sector</h4>
+          <p>Progression timeline. Absorb target quotas to advance sectors. Speed shifts scaling dynamically.</p>
+        </button>
+        <button id="modeGravityBtn" class="mode-card">
+          <h4>Gravity Well</h4>
+          <p>Survival setup. Core actively loses mass and shrinks. Feed orbs into the core to sustain equilibrium.</p>
+        </button>
+        <button id="modeChaosBtn" class="mode-card">
+          <h4>Chaos Storm</h4>
+          <p>60s Score Attack. Particle limitations doubled. Solar flares induce random gravity inversion matrix vectors.</p>
+        </button>
+      </div>
+      <button class="back-to-menu text-btn">← BACK TO MENU</button>
     </div>
 
-    <!-- Gravity Strength -->
-    <div class="control-group">
-      <label for="gravStrength">Gravity Strength: <span id="valStrength">1.0</span></label>
-      <input type="range" id="gravStrength" min="-2.5" max="3.0" step="0.1" value="1.0">
-      <span class="sub-hint">(Negative values push particles away)</span>
-    </div>
-
-    <!-- Maximum Vector Speed -->
-    <div class="control-group">
-      <label for="gravSpeed">Max Speed Velocity: <span id="valSpeed">8</span></label>
-      <input type="range" id="gravSpeed" min="2" max="25" step="1" value="8">
-    </div>
-
-    <!-- Atmosphere Friction -->
-    <div class="control-group">
-      <label for="swarmFriction">Atmosphere Friction: <span id="valFriction">Medium</span></label>
-      <input type="range" id="swarmFriction" min="0.85" max="0.99" step="0.01" value="0.97">
-    </div>
-
-    <!-- Motion Blur Trails -->
-    <div class="control-group">
-      <label for="trailLength">Motion Blur Trails: <span id="valTrails">Long</span></label>
-      <input type="range" id="trailLength" min="0.05" max="0.5" step="0.05" value="0.2">
-    </div>
-
-    <!-- Laser Connectors Toggle Switch -->
-    <div class="control-group checkbox-group">
-      <label class="toggle-container">
-        <span>Laser Connectors</span>
-        <input type="checkbox" id="toggleLines">
-        <span class="checkmark"></span>
-      </label>
-    </div>
-
-    <!-- Theme Palette Selector -->
-    <div class="control-group">
-      <label for="themePreset">Spectrum Theme Preset</label>
-      <select id="themePreset" class="custom-select">
-        <option value="cyber">Cyber Drift (Rainbow Shift)</option>
-        <option value="matrix">Matrix (Toxic Green)</option>
-        <option value="synth">Synthwave (Neon Fuchsia)</option>
-        <option value="deep">Deep Sea (Electric Cyan)</option>
-      </select>
+    <!-- Leaderboards Sub-View -->
+    <div id="leaderboardView" class="sub-view hidden">
+      <h3>QUANTUM RECORDS</h3>
+      <div class="leaderboard-scores">
+        <div class="score-row"><span>Standard Sector (Max Sector)</span><span id="lbStandard">1</span></div>
+        <div class="score-row"><span>Gravity Well (Max Survival)</span><span id="lbSurvival">0s</span></div>
+        <div class="score-row"><span>Chaos Storm (Max Harvest)</span><span id="lbChaos">0 DM</span></div>
+      </div>
+      <button class="back-to-menu text-btn">← BACK TO MENU</button>
     </div>
   </div>
 </div>
 
+<!-- ================= GAME OVER OVERLAY ================= -->
+<div id="gameOverMenu" class="overlay-container hidden">
+  <div class="menu-box glassmorphism alert-box">
+    <h2 class="alert-title">CORE COLLAPSE DETECTED</h2>
+    <p id="gameOverReason">The quantum portal radius reached absolute zero, inducing supernova state degradation.</p>
+    <div class="final-score-box">
+      <span id="finalScoreVal">0 Dark Matter collected</span>
+    </div>
+    <button id="restartGameBtn" class="neon-btn btn-cyan">REINITIALIZE SYSTEM</button>
+    <button id="exitToMenuBtn" class="text-btn">RETURN TO MASTER CONTROL</button>
+  </div>
+</div>
+
+<!-- ================= HUD DISPLAY BANNER ================= -->
+<div id="gameHud" class="hud-tophidden">
+  <div class="hud-stat">MODE: <span id="hudMode">STANDARD</span></div>
+  <div class="hud-stat">DARK MATTER: <span id="hudDm">0</span></div>
+  <div class="hud-stat">OBJECTIVE: <span id="hudObjective">0 / 500</span></div>
+</div>
+
+<!-- ================= SIDEBAR SHOP PANEL ================= -->
+<button id="settingsBtn" class="gear-btn" title="Open Upgrades Matrix">⚙️</button>
+
+<div id="settingsPanel" class="settings-panel hidden">
+  <div class="panel-header">
+    <h3>UPGRADES MATRIX</h3>
+    <button id="closeBtn" class="close-btn">&times;</button>
+  </div>
+  
+  <div class="panel-body">
+    <!-- Upgrade 1: Gravitational Pull -->
+    <div class="shop-item">
+      <div class="shop-item-info">
+        <h4>Gravitational Pull</h4>
+        <p>Increases base vector pull speed (+10% / Lvl)</p>
+        <span class="shop-lvl">Current Level: <span id="lvlGravPull">0</span></span>
+      </div>
+      <button id="buyGravPullBtn" class="shop-buy-btn">BUY [50 DM]</button>
+    </div>
+
+    <!-- Upgrade 2: Matter Replication -->
+    <div class="shop-item">
+      <div class="shop-item-info">
+        <h4>Matter Replication</h4>
+        <p>Increases maximum simulation loop counts (+5 / Lvl)</p>
+        <span class="shop-lvl">Current Level: <span id="lvlMatterRepl">0</span></span>
+      </div>
+      <button id="buyMatterReplBtn" class="shop-buy-btn">BUY [100 DM]</button>
+    </div>
+
+    <!-- Upgrade 3: Shockwave Overdrive -->
+    <div class="shop-item">
+      <div class="shop-item-info">
+        <h4>Shockwave Overdrive</h4>
+        <p>Expands kinetic click blast discharge radius (+20% / Lvl)</p>
+        <span class="shop-lvl">Current Level: <span id="lvlShockwave">0</span></span>
+      </div>
+      <button id="buyShockwaveBtn" class="shop-buy-btn">BUY [150 DM]</button>
+    </div>
+  </div>
+</div>
