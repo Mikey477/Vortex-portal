@@ -1,1 +1,258 @@
-document.addEventListener('DOMContentLoaded',()=>{const canvas=document.getElementById('vibeCanvas');if(!canvas)return;const ctx=canvas.getContext('2d');let width=canvas.width=window.innerWidth,height=canvas.height=window.innerHeight;window.addEventListener('resize',()=>{width=canvas.width=window.innerWidth;height=canvas.height=window.innerHeight});const settingsBtn=document.getElementById('settingsBtn'),settingsPanel=document.getElementById('settingsPanel'),closeBtn=document.getElementById('closeBtn'),inputCount=document.getElementById('ballNumber'),inputSize=document.getElementById('ballSize'),inputStrength=document.getElementById('gravStrength'),inputSpeed=document.getElementById('gravSpeed'),inputFriction=document.getElementById('swarmFriction'),inputTrails=document.getElementById('trailLength'),inputLines=document.getElementById('toggleLines'),inputTheme=document.getElementById('themePreset'),valCount=document.getElementById('valCount'),valSize=document.getElementById('valSize'),valStrength=document.getElementById('valStrength'),valSpeed=document.getElementById('valSpeed'),valFriction=document.getElementById('valFriction'),valTrails=document.getElementById('valTrails');settingsBtn.addEventListener('click',()=>settingsPanel.classList.remove('hidden'));closeBtn.addEventListener('click',()=>settingsPanel.classList.add('hidden'));let config={count:parseInt(inputCount.value),baseSize:parseFloat(inputSize.value),strength:parseFloat(inputStrength.value),maxSpeed:parseInt(inputSpeed.value),drag:parseFloat(inputFriction.value),trail:parseFloat(inputTrails.value),renderLines:inputLines.checked,theme:inputTheme.value};const mouse={x:width/2,y:height/2,targetX:width/2,targetY:height/2,active:!1},pulses=[],sparks=[],swarm=[];let baseHue=190;class Bee{constructor(){this.init()}init(){this.x=Math.random()*(width-40)+20;this.y=Math.random()*(height-40)+20;this.vx=(Math.random()-.5)*5;this.vy=(Math.random()-.5)*5;this.sizeModifier=Math.random()*.6+.7;this.angleOffset=Math.random()*Math.PI*2}update(time){let dx=mouse.x-this.x,dy=mouse.y-this.y,distance=Math.sqrt(dx*dx+dy*dy);if(distance>5){let baseForce=Math.min(.5,150/distance),vectorDirection=config.strength;this.vx+=(dx/distance)*baseForce*vectorDirection;this.vy+=(dy/distance)*baseForce*vectorDirection}this.vx+=Math.sin(time+this.angleOffset)*.2;this.vy+=Math.cos(time+this.angleOffset)*.2;pulses.forEach(p=>{let pdx=this.x-p.x,pdy=this.y-p.y,pDist=Math.sqrt(pdx*pdx+pdy*pdy),diff=Math.abs(pDist-p.radius);if(diff<120){let push=(1-diff/120)*p.force*p.life;if(pDist>0){this.vx+=(pdx/pDist)*push*.5;this.vy+=(pdy/pDist)*push*.5}}});this.vx*=config.drag;this.vy*=config.drag;let currentSpeed=Math.sqrt(this.vx*this.vx+this.vy*this.vy);if(currentSpeed>config.maxSpeed){this.vx=(this.vx/currentSpeed)*config.maxSpeed;this.vy=(this.vy/currentSpeed)*config.maxSpeed}this.x+=this.vx;this.y+=this.vy;const calculatedRadius=config.baseSize*this.sizeModifier,bounceFriction=.82;if(this.x-calculatedRadius<0){this.x=calculatedRadius;this.vx=-this.vx*bounceFriction}else if(this.x+calculatedRadius>width){this.x=width-calculatedRadius;this.vx=-this.vx*bounceFriction}if(this.y-calculatedRadius<0){this.y=calculatedRadius;this.vy=-this.vy*bounceFriction}else if(this.y+calculatedRadius>height){this.y=height-calculatedRadius;this.vy=-this.vy*bounceFriction}}draw(){const calculatedRadius=config.baseSize*this.sizeModifier;let speedFactor=Math.sqrt(this.vx*this.vx+this.vy*this.vy),fillStyle='';if(config.theme==='cyber'){let hue=baseHue+(speedFactor*4);fillStyle=`hsla(${hue},100%,70%,0.95)`}else if(config.theme==='matrix'){fillStyle=`hsla(120,100%,${60+speedFactor*2}%,0.95)`}else if(config.theme==='synth'){fillStyle=`hsla(320,100%,${60+speedFactor*2}%,0.95)`}else if(config.theme==='deep'){fillStyle=`hsla(190,100%,${65+speedFactor*2}%,0.95)`}ctx.beginPath();ctx.arc(this.x,this.y,calculatedRadius,0,Math.PI*2);ctx.fillStyle=fillStyle;ctx.fill()}}function matchSwarmCount(){if(swarm.length<config.count){while(swarm.length<config.count)swarm.push(new Bee())}else if(swarm.length>config.count){swarm.length=config.count}}matchSwarmCount();inputCount.addEventListener('input',e=>{config.count=parseInt(e.target.value);valCount.textContent=config.count;matchSwarmCount()});inputSize.addEventListener('input',e=>{config.baseSize=parseFloat(e.target.value);valSize.textContent=config.baseSize.toFixed(1)+"px"});inputStrength.addEventListener('input',e=>{config.strength=parseFloat(e.target.value);valStrength.textContent=config.strength.toFixed(1)});inputSpeed.addEventListener('input',e=>{config.maxSpeed=parseInt(e.target.value);valSpeed.textContent=config.maxSpeed});inputFriction.addEventListener('input',e=>{config.drag=parseFloat(e.target.value);if(config.drag>.97)valFriction.textContent="Low (Icy)";else if(config.drag>=.93)valFriction.textContent="Medium";else valFriction.textContent="High (Heavy)"});inputTrails.addEventListener('input',e=>{config.trail=parseFloat(e.target.value);if(config.trail<=.1)valTrails.textContent="Sharp";else if(config.trail<=.25)valTrails.textContent="Long";else valTrails.textContent="Hyper Fluid"});inputLines.addEventListener('change',e=>{config.renderLines=e.target.checked});inputTheme.addEventListener('change',e=>{config.theme=e.target.value});window.addEventListener('mousemove',e=>{mouse.targetX=e.clientX;mouse.targetY=e.clientY;mouse.active=!0});window.addEventListener('mouseleave',()=>{mouse.active=!1});window.addEventListener('click',e=>{if(settingsPanel.contains(e.target)||settingsBtn.contains(e.target))return;baseHue=(baseHue+65)%360;const sparkCount=25;for(let i=0;i<sparkCount;i++){const angle=Math.random()*Math.PI*2,speed=Math.random()*5+3;let sparkHue=baseHue;if(config.theme==='matrix')sparkHue=120;else if(config.theme==='synth')sparkHue=320;else if(config.theme==='deep')sparkHue=190;sparks.push({x:e.clientX,y:e.clientY,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed,size:Math.random()*2+1,hue:sparkHue+(config.theme==='cyber'?Math.random()*30:0),alpha:1,decay:Math.random()*.03+.02})}});window.addEventListener('contextmenu',e=>{if(settingsPanel.contains(e.target)||settingsBtn.contains(e.target))return;e.preventDefault();pulses.push({x:e.clientX,y:e.clientY,radius:0,maxRadius:Math.max(width,height)*.85,force:140,life:1})});let time=0;function draw(){ctx.fillStyle=`rgba(2,2,5,${config.trail})`;ctx.fillRect(0,0,width,height);mouse.x+=(mouse.targetX-mouse.x)*.08;mouse.y+=(mouse.targetY-mouse.y)*.08;time+=0.04;for(let i=pulses.length-1;i>=0;i--){let p=pulses[i];p.radius+=22;p.life-=.02;if(p.life<=0||p.radius>p.maxRadius)pulses.splice(i,1)}swarm.forEach(bee=>{bee.update(time);bee.draw()});if(config.renderLines){const maxConnectDistance=55,cellSize=55,grid=new Map();swarm.forEach((b,idx)=>{const cx=Math.floor(b.x/cellSize),cy=Math.floor(b.y/cellSize),key=`${cx},${cy}`;if(!grid.has(key))grid.set(key,[]);grid.get(key).push(idx)});let strokeStyle='';if(config.theme==='cyber')strokeStyle='rgba(0,255,200,';else if(config.theme==='matrix')strokeStyle='rgba(50,255,50,';else if(config.theme==='synth')strokeStyle='rgba(255,50,200,';else if(config.theme==='deep')strokeStyle='rgba(0,200,255,';ctx.lineWidth=.6;grid.forEach((cellIndices,key)=>{const[cx,cy]=key.split(',').map(Number);for(let oX=0;oX<=1;oX++){for(let oY=(oX===0?0:-1);oY<=1;oY++){const targetKey=`${cx+oX},${cy+oY}`;if(!grid.has(targetKey))continue;const targetIndices=grid.get(targetKey);for(let i=0;i<cellIndices.length;i++){const b1Idx=cellIndices[i],b1=swarm[b1Idx];for(let j=0;j<targetIndices.length;j++){const b2Idx=targetIndices[j];if(b1Idx>=b2Idx)continue;const b2=swarm[b2Idx],dx=b1.x-b2.x,dy=b1.y-b2.y,distSq=dx*dx+dy*dy;if(distSq<maxConnectDistance*maxConnectDistance){const distance=Math.sqrt(distSq),opacity=(1-(distance/maxConnectDistance))*.25;ctx.beginPath();ctx.moveTo(b1.x,b1.y);ctx.lineTo(b2.x,b2.y);ctx.strokeStyle=`${strokeStyle}${opacity})`;ctx.stroke()}}}}}})}for(let i=sparks.length-1;i>=0;i--){let s=sparks[i];s.x+=s.vx;s.y+=s.vy;s.vx*=.95;s.vy*=.95;s.alpha-=s.decay;if(s.alpha<=0){sparks.splice(i,1);continue}ctx.beginPath();ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fillStyle=`hsla(${s.hue},100%,75%,${s.alpha})`;ctx.fill()}requestAnimationFrame(draw)}draw()});
+document.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('vibeCanvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    });
+
+    // DOM Element Selectors
+    const startMenu = document.getElementById('startMenu');
+    const modePanel = document.getElementById('modePanel');
+    const leaderPanel = document.getElementById('leaderPanel');
+    const gameOverPanel = document.getElementById('gameOverPanel');
+    const gameHUD = document.getElementById('gameHUD');
+    const settingsPanel = document.getElementById('settingsPanel');
+
+    const btnStart = document.getElementById('btnStart');
+    const btnMode = document.getElementById('btnMode');
+    const btnLeader = document.getElementById('btnLeader');
+    const btnModeBack = document.getElementById('btnModeBack');
+    const btnLeaderBack = document.getElementById('btnLeaderBack');
+    const btnRestart = document.getElementById('btnRestart');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const closeBtn = document.getElementById('closeBtn');
+
+    const modeCards = document.querySelectorAll('.mode-card');
+    const inputTrails = document.getElementById('trailLength');
+    const inputLines = document.getElementById('toggleLines');
+    const valTrails = document.getElementById('valTrails');
+
+    // HUD Dynamic Selectors
+    const hudSector = document.getElementById('hudSector');
+    const hudScore = document.getElementById('hudScore');
+    const hudTarget = document.getElementById('hudTarget');
+    const hudDM = document.getElementById('hudDM');
+    const hudTimer = document.getElementById('hudTimer');
+    const shopDM = document.getElementById('shopDM');
+    const finalScore = document.getElementById('finalScore');
+    const gameOverReason = document.getElementById('gameOverReason');
+
+    // Upgrade Button Elements
+    const buyGrav = document.getElementById('buyGrav');
+    const buyMax = document.getElementById('buyMax');
+    const buyShock = document.getElementById('buyShock');
+
+    // Game Core State Variables
+    let currentMode = 'standard'; // standard, survival, chaos
+    let isPlaying = false;
+    let score = 0;
+    let darkMatter = 0;
+    let sector = 1;
+    let gameTime = 0; // seconds tracker
+    let timeLimit = 60; // For score attack modes
+    let intervalTimer = null;
+
+    // Core Properties (Mass / Size Simulation parameters)
+    let coreRadius = 40;
+    let targetCoreRadius = 40;
+    let baseTargetScore = 500;
+
+    // Real-Time Upgrade Constants Multipliers
+    let upgradeModifiers = {
+        gravPull: 1.0,
+        maxParticlesBonus: 0,
+        shockRadiusBonus: 1.0
+    };
+
+    let config = {
+        trail: parseFloat(inputTrails.value),
+        renderLines: inputLines.checked
+    };
+
+    const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2, active: false };
+    const pulses = [];
+    const sparks = []; 
+    const swarm = [];
+    let baseHue = 190; 
+    let solarFlareActive = false;
+    let solarFlareTimer = 0;
+
+    // LocalStorage Leaderboard Cache Engines
+    let highScores = {
+        standard: parseInt(localStorage.getItem('highStandard')) || 1,
+        survival: parseInt(localStorage.getItem('highSurvival')) || 0,
+        chaos: parseInt(localStorage.getItem('highChaos')) || 0
+    };
+    updateLeaderboardUI();
+
+    // Menu View Toggles
+    btnMode.addEventListener('click', () => { startMenu.classList.add('hidden'); modePanel.classList.remove('hidden'); });
+    btnModeBack.addEventListener('click', () => { modePanel.classList.add('hidden'); startMenu.classList.remove('hidden'); });
+    btnLeader.addEventListener('click', () => { startMenu.classList.add('hidden'); leaderPanel.classList.remove('hidden'); });
+    btnLeaderBack.addEventListener('click', () => { leaderPanel.classList.add('hidden'); startMenu.classList.remove('hidden'); });
+    settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
+    closeBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+
+    modeCards.forEach(card => {
+        card.addEventListener('click', () => {
+            modeCards.forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+            currentMode = card.getAttribute('data-mode');
+        });
+    });
+
+    btnStart.addEventListener('click', startGame);
+    btnRestart.addEventListener('click', startGame);
+
+    // --- QUANTUM SHOP ENGINE LOGIC ---
+    function updateShopButtons() {
+        hudDM.textContent = darkMatter;
+        shopDM.textContent = darkMatter;
+
+        [buyGrav, buyMax, buyShock].forEach(btn => {
+            const cost = parseInt(btn.getAttribute('data-cost'));
+            btn.disabled = darkMatter < cost;
+        });
+    }
+
+    buyGrav.addEventListener('click', () => {
+        deductDM(50);
+        upgradeModifiers.gravPull += 0.15;
+        matchSwarmCapacity();
+    });
+    buyMax.addEventListener('click', () => {
+        deductDM(100);
+        upgradeModifiers.maxParticlesBonus += 25;
+        matchSwarmCapacity();
+    });
+    buyShock.addEventListener('click', () => {
+        deductDM(150);
+        upgradeModifiers.shockRadiusBonus += 0.25;
+    });
+
+    function deductDM(amount) {
+        darkMatter -= amount;
+        updateShopButtons();
+    }
+
+    // Slider inputs processing
+    inputTrails.addEventListener('input', e => {
+        config.trail = parseFloat(e.target.value);
+        valTrails.textContent = config.trail <= 0.1 ? "Sharp" : config.trail <= 0.25 ? "Long" : "Hyper Fluid";
+    });
+    inputLines.addEventListener('change', e => { config.renderLines = e.target.checked; });
+
+    // --- GAME ACTIONS INITIALIZATION ---
+    function startGame() {
+        startMenu.classList.add('hidden');
+        modePanel.classList.add('hidden');
+        gameOverPanel.classList.add('hidden');
+        gameHUD.classList.remove('hidden');
+
+        // Reset runtime values
+        isPlaying = true;
+        score = 0;
+        gameTime = 0;
+        sector = 1;
+        coreRadius = 50;
+        targetCoreRadius = 50;
+        solarFlareActive = false;
+        solarFlareTimer = 0;
+
+        if (currentMode === 'survival') {
+            baseTargetScore = Infinity; // Survival runs forever until collapse
+            hudTarget.textContent = "∞";
+            hudSector.textContent = "SURVIVAL";
+        } else if (currentMode === 'chaos') {
+            gameTime = timeLimit;
+            hudTarget.textContent = "LIMITLESS";
+            hudSector.textContent = "CHAOS ATTACK";
+        } else {
+            baseTargetScore = 500;
+            hudTarget.textContent = baseTargetScore;
+            hudSector.textContent = sector;
+        }
+
+        matchSwarmCapacity();
+        updateShopButtons();
+
+        // Run independent game clock
+        if (intervalTimer) clearInterval(intervalTimer);
+        intervalTimer = setInterval(gameClockTick, 1000);
+    }
+
+    function gameClockTick() {
+        if (!isPlaying) return;
+
+        if (currentMode === 'standard') {
+            gameTime++;
+            hudTimer.textContent = gameTime + "s";
+        } else if (currentMode === 'survival') {
+            gameTime++;
+            hudTimer.textContent = gameTime + "s";
+            // Core actively drops size over time
+            targetCoreRadius -= (1.2 + (gameTime * 0.005)); 
+            if (coreRadius <= 5) triggerGameOver("Core collapsed due to massive mass degradation!");
+        } else if (currentMode === 'chaos') {
+            gameTime--;
+            hudTimer.textContent = gameTime + "s";
+            
+            // Handle solar flares execution intervals
+            solarFlareTimer++;
+            if (solarFlareTimer >= 10) {
+                solarFlareTimer = 0;
+                triggerSolarFlare();
+            }
+
+            if (gameTime <= 0) triggerGameOver("Time expired! Chaos harvest window closed.");
+        }
+    }
+
+    function triggerSolarFlare() {
+        solarFlareActive = true;
+        baseHue = (baseHue + 120) % 360; // Violent color shift
+        setTimeout(() => { solarFlareActive = false; }, 2500); // Inverse gravity flips back
+    }
+
+    function triggerGameOver(reason) {
+        isPlaying = false;
+        clearInterval(intervalTimer);
+        gameHUD.classList.add('hidden');
+        gameOverPanel.classList.remove('hidden');
+        gameOverReason.textContent = reason;
+        finalScore.textContent = currentMode === 'survival' ? gameTime + " seconds survived" : score + " orbs collected";
+
+        // Evaluate Leaderboard cache updates
+        if (currentMode === 'standard' && sector > highScores.standard) {
+            highScores.standard = sector;
+            localStorage.setItem('highStandard', sector);
+        } else if (currentMode === 'survival' && gameTime > highScores.survival) {
+            highScores.survival = gameTime;
+            localStorage.setItem('highSurvival', gameTime);
+        } else if (currentMode === 'chaos' && score > highScores.chaos) {
+            highScores.chaos = score;
+            localStorage.setItem('highChaos', score);
+        }
+        updateLeaderboardUI();
+    }
+
+    function updateLeaderboardUI() {
+        document.getElementById('highStandard').textContent = "Sector " + highScores.standard;
+        document.getElementById('highSurvival').textContent = highScores.survival + "s";
+        document.getElementById('highChaos').textContent = highScores.chaos + " pts";
+    }
+
+    // --- SWARM AGENT ENGINE ATOM ---
+    class Orb {
+        constructor() {
+            this.init();
+        }
+        init() {
+            // Spawn loosely outside the core
+            const angle = Math.random() * Math.PI * 2;
