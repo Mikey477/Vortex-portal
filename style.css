@@ -9,7 +9,8 @@ body, html {
   height: 100%;
   background: #020205;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Courier New', Courier, monospace;
+  color: #ffffff;
   user-select: none;
 }
 
@@ -22,7 +23,174 @@ canvas {
   z-index: 1;
 }
 
-/* Gear Button Layout */
+.hidden {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Glassmorphism Generic Design Profile */
+.glassmorphism {
+  background: rgba(8, 8, 20, 0.75);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 255, 200, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+/* Full Screen Layout Overlay Box Elements */
+.overlay-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(2, 2, 8, 0.65);
+  transition: opacity 0.3s ease;
+}
+
+.menu-box {
+  width: 480px;
+  padding: 40px;
+  text-align: center;
+}
+
+.game-title {
+  font-size: 2.8rem;
+  letter-spacing: 6px;
+  color: #00ffcc;
+  text-shadow: 0 0 15px rgba(0, 255, 200, 0.6);
+}
+
+.game-subtitle {
+  font-size: 1.1rem;
+  letter-spacing: 4px;
+  color: #ff007f;
+  margin-bottom: 35px;
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
+}
+
+/* Cyber Terminal Style Button Grouping */
+.vertical-button-box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.neon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  padding: 14px;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #fff;
+  letter-spacing: 2px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-cyan { border-color: #00ffcc; }
+.btn-cyan:hover { background: #00ffcc; color: #020205; box-shadow: 0 0 15px #00ffcc; }
+
+.btn-magenta { border-color: #ff007f; }
+.btn-magenta:hover { background: #ff007f; color: #020205; box-shadow: 0 0 15px #ff007f; }
+
+.btn-purple { border-color: #9d4edd; }
+.btn-purple:hover { background: #9d4edd; color: #020205; box-shadow: 0 0 15px #9d4edd; }
+
+.text-btn {
+  background: none;
+  border: none;
+  font-family: inherit;
+  color: #8a99ad;
+  cursor: pointer;
+  letter-spacing: 1px;
+  margin-top: 20px;
+  transition: color 0.2s;
+}
+.text-btn:hover { color: #fff; text-decoration: underline; }
+
+/* Submenus Selection Display Models */
+.sub-view h3 {
+  font-size: 1rem;
+  letter-spacing: 2px;
+  color: #00ffcc;
+  margin-bottom: 20px;
+}
+
+.mode-card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mode-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 15px;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.mode-card h4 { color: #ff007f; font-size: 0.95rem; margin-bottom: 4px; }
+.mode-card p { font-size: 0.75rem; color: #a0aec0; line-height: 1.3; }
+.mode-card:hover, .mode-card.active {
+  border-color: #00ffcc;
+  background: rgba(0, 255, 200, 0.05);
+}
+
+/* Leaderboards display board values mapping */
+.leaderboard-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 8px 4px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.score-row span:last-child { color: #00ffcc; font-weight: bold; }
+
+/* Game Over Supernova State */
+.alert-box { border-color: #ff007f; }
+.alert-title { color: #ff007f; font-size: 1.6rem; letter-spacing: 3px; margin-bottom: 10px; }
+.final-score-box { margin: 20px 0; font-size: 1.1rem; color: #00ffcc; font-weight: bold; }
+
+/* In-Game Active Dashboard Hud Banner Elements */
+#gameHud {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  background: rgba(5, 5, 12, 0.8);
+  border: 1px solid rgba(0, 255, 200, 0.15);
+  border-top: none;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  padding: 12px 30px;
+  display: flex;
+  gap: 40px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.hud-tophidden { display: none !important; }
+.hud-stat { font-size: 0.85rem; letter-spacing: 2px; font-weight: bold; }
+.hud-stat span { color: #00ffcc; }
+
+/* Settings Upgrade Sidebar Panel Framework Layout */
 .gear-btn {
   position: absolute;
   top: 20px;
@@ -36,183 +204,60 @@ canvas {
   border-radius: 50%;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  transition: transform 0.4s ease, background 0.2s;
 }
+.gear-btn:hover { transform: rotate(60deg) scale(1.1); border-color: #00ffcc; }
 
-.gear-btn:hover {
-  transform: rotate(60deg) scale(1.1);
-  background: rgba(255, 255, 255, 0.2);
-  border-color: #00ffcc;
-}
-
-/* Overhauled Glass Dashboard Panel */
 .settings-panel {
   position: absolute;
   top: 20px;
   right: 20px;
   z-index: 101;
-  width: 330px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
-  background: rgba(8, 8, 16, 0.82);
+  width: 340px;
+  background: rgba(8, 8, 16, 0.85);
   backdrop-filter: blur(25px);
   border: 1px solid rgba(0, 255, 200, 0.2);
   border-radius: 20px;
   padding: 24px;
-  color: #fff;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-  transform-origin: top right;
 }
-
-/* Custom Panel Scrollbar styling */
-.settings-panel::-webkit-scrollbar {
-  width: 4px;
-}
-.settings-panel::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 200, 0.3);
-  border-radius: 2px;
-}
-
-.settings-panel.hidden {
-  opacity: 0;
-  transform: scale(0.8) translate(20px, -20px);
-  pointer-events: none;
-}
-
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   padding-bottom: 12px;
   margin-bottom: 20px;
 }
+.panel-header h3 { font-size: 0.8rem; letter-spacing: 2px; color: #00ffcc; }
+.close-btn { background: none; border: none; color: #a0aec0; font-size: 26px; cursor: pointer; line-height: 1; }
+.close-btn:hover { color: #ff007f; }
 
-.panel-header h3 {
-  font-size: 13px;
-  letter-spacing: 2.5px;
-  color: #00ffcc;
-  text-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  color: #a0aec0;
-  font-size: 26px;
-  cursor: pointer;
-  line-height: 1;
-  transition: color 0.2s;
-}
-
-.close-btn:hover {
-  color: #ff007f;
-}
-
-.control-group {
-  margin-bottom: 18px;
-}
-
-.control-group label {
+/* Upgrade Marketplace List Layout Rows */
+.shop-item {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
-  color: #e2e8f0;
-  margin-bottom: 8px;
-}
-
-.control-group label span {
-  color: #00ffcc;
-  font-weight: 600;
-}
-
-.sub-hint {
-  display: block;
-  font-size: 10px;
-  color: #ff007f;
-  margin-top: 3px;
-  opacity: 0.85;
-}
-
-/* Slick Custom Dropdown Select */
-.custom-select {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  outline: none;
-  cursor: pointer;
-}
-.custom-select option {
-  background: #0a0a14;
-  color: #fff;
-}
-
-/* Neon Sliders */
-input[type="range"] {
-  -webkit-appearance: none;
-  width: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  height: 6px;
-  border-radius: 3px;
-  outline: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #00ffcc;
-  cursor: pointer;
-  box-shadow: 0 0 8px #00ffcc;
-}
-
-/* iOS Style Toggle Switch */
-.checkbox-group {
-  margin-top: 22px;
-  margin-bottom: 22px;
-}
-.toggle-container {
-  display: flex;
   align-items: center;
-  justify-content: space-between !important;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.shop-item-info { width: 65%; }
+.shop-item-info h4 { font-size: 0.85rem; color: #00ffcc; margin-bottom: 2px; }
+.shop-item-info p { font-size: 0.65rem; color: #a0aec0; line-height: 1.2; margin-bottom: 4px; }
+.shop-lvl { font-size: 0.65rem; color: #ff007f; font-weight: bold; }
+
+.shop-buy-btn {
+  background: rgba(0, 255, 200, 0.1);
+  border: 1px solid #00ffcc;
+  color: #00ffcc;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: bold;
+  border-radius: 6px;
   cursor: pointer;
-  position: relative;
+  transition: all 0.2s;
 }
-.toggle-container input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.checkmark {
-  position: relative;
-  width: 40px;
-  height: 22px;
-  background-color: rgba(255,255,255,0.1);
-  border-radius: 20px;
-  transition: .3s;
-}
-.checkmark:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  border-radius: 50%;
-  transition: .3s;
-}
-input:checked + .checkmark {
-  background-color: #00ffcc;
-  box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
-}
-input:checked + .checkmark:before {
-  transform: translateX(18px);
-}
+.shop-buy-btn:hover { background: #00ffcc; color: #020205; box-shadow: 0 0 10px #00ffcc; }
