@@ -11,6 +11,35 @@ document.addEventListener('DOMContentLoaded', () => {
     height = canvas.height = window.innerHeight;
   });
 
+  // Global Engine Controls (Moved up to prevent reference loop crashes)
+  let gameState = {
+    running: false,
+    currentMode: 'standard', 
+    sector: 1,
+    absorbedCount: 0,
+    targetObjective: 500,
+    darkMatter: 0,
+    coreRadius: 40,
+    maxCoreRadius: 120,
+    survivalSeconds: 0,
+    chaosTimeLeft: 60,
+    solarFlareActive: false,
+    flareTimer: 0
+  };
+
+  let upgrades = {
+    gravPullLevel: 0,
+    matterReplLevel: 0,
+    shockwaveLevel: 0
+  };
+
+  let scores = {
+    standard: 1,
+    survival: 0,
+    chaos: 0
+  };
+
+  // UI Element Linkage Map
   const startMenu = document.getElementById('startMenu');
   const mainMenuButtons = document.getElementById('mainMenuButtons');
   const modeView = document.getElementById('modeView');
@@ -49,33 +78,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const lbSurvival = document.getElementById('lbSurvival');
   const lbChaos = document.getElementById('lbChaos');
 
-  let gameState = {
-    running: false,
-    currentMode: 'standard', 
-    sector: 1,
-    absorbedCount: 0,
-    targetObjective: 500,
-    darkMatter: 0,
-    coreRadius: 40,
-    maxCoreRadius: 120,
-    survivalSeconds: 0,
-    chaosTimeLeft: 60,
-    solarFlareActive: false,
-    flareTimer: 0
-  };
-
-  let upgrades = {
-    gravPullLevel: 0,
-    matterReplLevel: 0,
-    shockwaveLevel: 0
-  };
-
-  let scores = {
-    standard: 1,
-    survival: 0,
-    chaos: 0
-  };
-
   function loadScores() {
     const saved = localStorage.getItem('quantum_harvest_scores');
     if (saved) {
@@ -93,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lbSurvival.textContent = scores.survival + 's';
     lbChaos.textContent = scores.chaos + ' DM';
   }
-
   settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
   closeBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
 
@@ -166,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
       buyShockwaveBtn.textContent = 'BUY [' + (150 + upgrades.shockwaveLevel * 75) + ' DM]';
     }
   });
+
   const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2, active: false };
   const pulses = [];
   const sparks = []; 
