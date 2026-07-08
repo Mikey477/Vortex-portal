@@ -7,6 +7,8 @@ const ctx = canvas.getContext('2d');
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    gameState.coreX = canvas.width / 2;
+    gameState.coreY = canvas.height / 2;
 }
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
@@ -48,11 +50,10 @@ class Particle {
         this.vx = (Math.random() - 0.5) * gameState.particleSpeed;
         this.vy = (Math.random() - 0.5) * gameState.particleSpeed;
         this.radius = 4;
-        this.color = this.getColor();
     }
     
     getColor() {
-        const hue = (Date.now() / 50) % 360;
+        const hue = (Date.now() / 50 + Math.random() * 100) % 360;
         return `hsl(${hue}, 100%, 50%)`;
     }
     
@@ -62,11 +63,15 @@ class Particle {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         if (distance > gameState.coreSize + 10) {
-            const forceX = (dx / distance) * gameState.gravityStrength;
-            const forceY = (dy / distance) * gameState.gravityStrength;
+            const forceX = (dx / (distance + 1)) * gameState.gravityStrength;
+            const forceY = (dy / (distance + 1)) * gameState.gravityStrength;
             this.vx += forceX;
             this.vy += forceY;
         }
+        
+        // Add velocity damping to prevent infinite acceleration
+        this.vx *= 0.98;
+        this.vy *= 0.98;
         
         this.x += this.vx;
         this.y += this.vy;
@@ -79,7 +84,7 @@ class Particle {
     }
     
     draw() {
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.getColor();
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -135,7 +140,7 @@ function updateGame() {
     }
     
     // Spawn particles periodically
-    if (gameState.particles.length < gameState.maxParticles && Math.random() < 0.1) {
+    if (gameState.particles.length < gameState.maxParticles && Math.random() < 0.15) {
         spawnParticle();
     }
     
@@ -146,6 +151,13 @@ function updateGame() {
 function drawGame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
+    // Draw background gradient
+    const gradient = ctx.createRadialGradient(gameState.coreX, gameState.coreY, 0, gameState.coreX, gameState.coreY, 500);
+    gradient.addColorStop(0, 'rgba(26, 42, 74, 0.3)');
+    gradient.addColorStop(1, 'rgba(10, 14, 39, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
     // Draw core
     const coreHue = (Date.now() / 100) % 360;
     ctx.fillStyle = `hsl(${coreHue}, 100%, 50%)`;
@@ -153,12 +165,15 @@ function drawGame() {
     ctx.arc(gameState.coreX, gameState.coreY, gameState.coreSize, 0, Math.PI * 2);
     ctx.fill();
     
-    // Draw glow
-    ctx.strokeStyle = `hsla(${coreHue}, 100%, 50%, 0.3)`;
-    ctx.lineWidth = 3;
+    // Draw core glow
+    ctx.shadowColor = `hsl(${coreHue}, 100%, 50%)`;
+    ctx.shadowBlur = 20;
+    ctx.strokeStyle = `hsla(${coreHue}, 100%, 50%, 0.5)`;
+    ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(gameState.coreX, gameState.coreY, gameState.coreSize + 10, 0, Math.PI * 2);
+    ctx.arc(gameState.coreX, gameState.coreY, gameState.coreSize + 15, 0, Math.PI * 2);
     ctx.stroke();
+    ctx.shadowBlur = 0;
     
     // Draw particles
     for (let particle of gameState.particles) {
@@ -177,8 +192,9 @@ function gameLoop() {
 
 // UPDATE HUD
 function updateHUD() {
-    document.getElementById('modeDisplay').textContent = 
-        gameState.currentMode === 'standard' ? 'Standard Sector' : 'Gravity Well';
+    const modeText = gameState.currentMode === 'standard' ? 'Standard Sector' : 
+                     gameState.currentMode === 'gravity' ? 'Gravity Well' : 'Sandbox';
+    document.getElementById('modeDisplay').textContent = modeText;
     document.getElementById('coreSize').textContent = Math.max(0, Math.floor(gameState.coreSize));
     document.getElementById('particleCount').textContent = gameState.particles.length;
     document.getElementById('absorbed').textContent = gameState.absorbedCount;
@@ -187,7 +203,9 @@ function updateHUD() {
     document.getElementById('dmAmount').textContent = gameState.darkMatter;
     
     // Update upgrade buttons
-    updateUpgradeButtons();
+    if (gameState.currentMode !== 'sandbox') {
+        updateUpgradeButtons();
+    }
 }
 
 // UPDATE UPGRADE BUTTONS
@@ -243,7 +261,9 @@ function advanceSector() {
 // END GAME
 function endGame() {
     gameState.isRunning = false;
-    saveHighScore(gameState.darkMatter);
+    if (gameState.currentMode !== 'sandbox') {
+        saveHighScore(gameState.darkMatter);
+    }
     showGameOverScreen();
 }
 
@@ -254,8 +274,8 @@ function triggerShockwave() {
         const dy = particle.y - gameState.mouseY;
         const distance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance < gameState.shockwaveRadius) {
-            const force = (gameState.shockwaveRadius - distance) / gameState.shockwaveRadius * 5;
+        if (distance < gameState.shockwaveRadius && distance > 0) {
+            const force = (gameState.shockwaveRadius - distance) / gameState.shockwaveRadius * 8;
             particle.vx += (dx / distance) * force;
             particle.vy += (dy / distance) * force;
         }
@@ -276,9 +296,10 @@ document.addEventListener('mousedown', (e) => {
 
 document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// UI EVENTS
+// UI EVENTS - Mode Selection
 document.getElementById('standardBtn').addEventListener('click', () => startGame('standard'));
 document.getElementById('gravityBtn').addEventListener('click', () => startGame('gravity'));
+document.getElementById('sandboxBtn').addEventListener('click', () => startGame('sandbox'));
 
 function startGame(mode) {
     gameState.currentMode = mode;
@@ -291,7 +312,16 @@ function startGame(mode) {
     gameState.targetAbsorbed = 500;
     gameState.gravityStrength = 0.3;
     gameState.maxParticles = 100;
+    gameState.particleSpeed = 2;
+    gameState.shockwaveRadius = 100;
     gameState.startTime = Date.now();
+    
+    // Reset upgrades for non-sandbox modes
+    if (mode !== 'sandbox') {
+        gameState.upgradeGravity = 0;
+        gameState.upgradeParticles = 0;
+        gameState.upgradeShockwave = 0;
+    }
     
     // Spawn initial particles
     for (let i = 0; i < gameState.maxParticles / 2; i++) {
@@ -299,8 +329,15 @@ function startGame(mode) {
     }
     
     document.getElementById('menuOverlay').classList.add('hidden');
-    document.getElementById('sidePanel').classList.add('show');
-    document.getElementById('hud').style.display = 'block';
+    document.getElementById('hud').classList.add('show');
+    
+    if (mode === 'sandbox') {
+        document.getElementById('gearBtn').classList.add('show');
+        document.getElementById('sidePanel').classList.remove('show');
+    } else {
+        document.getElementById('gearBtn').classList.remove('show');
+        document.getElementById('sidePanel').classList.add('show');
+    }
 }
 
 // GAME OVER SCREEN
@@ -320,7 +357,9 @@ document.getElementById('menuBtn').addEventListener('click', () => {
     document.getElementById('gameOverScreen').classList.remove('show');
     document.getElementById('menuOverlay').classList.remove('hidden');
     document.getElementById('sidePanel').classList.remove('show');
-    document.getElementById('hud').style.display = 'none';
+    document.getElementById('gearBtn').classList.remove('show');
+    document.getElementById('hud').classList.remove('show');
+    gameState.isRunning = false;
 });
 
 // VICTORY SCREEN
@@ -352,7 +391,7 @@ document.getElementById('leaderboardBtn').addEventListener('click', () => {
     list.innerHTML = '';
     
     if (scores.length === 0) {
-        list.innerHTML = '<div class="leaderboard-entry">No scores yet!</div>';
+        list.innerHTML = '<div class="leaderboard-entry"><span>No scores yet!</span></div>';
     } else {
         scores.forEach((score, index) => {
             const entry = document.createElement('div');
@@ -365,13 +404,43 @@ document.getElementById('leaderboardBtn').addEventListener('click', () => {
 
 document.getElementById('closeLeaderboard').addEventListener('click', () => {
     document.getElementById('leaderboard').classList.remove('show');
-    document.getElementById('menuOverlay').classList.remove('hidden');
+    document.getElementById('menuOverlay').classList.add('hidden');
 });
 
 // UPGRADE BUTTONS
 document.getElementById('upgrade1').addEventListener('click', () => buyUpgrade(0));
 document.getElementById('upgrade2').addEventListener('click', () => buyUpgrade(1));
 document.getElementById('upgrade3').addEventListener('click', () => buyUpgrade(2));
+
+// SANDBOX SETTINGS
+document.getElementById('gearBtn').addEventListener('click', () => {
+    document.getElementById('settingsMenu').classList.add('show');
+});
+
+document.getElementById('closeSettings').addEventListener('click', () => {
+    document.getElementById('settingsMenu').classList.remove('show');
+    applySandboxSettings();
+});
+
+function applySandboxSettings() {
+    const ballNum = parseInt(document.getElementById('settingsBallNum').value) || 50;
+    const speed = parseFloat(document.getElementById('settingsSpeed').value) || 2;
+    const gravity = parseFloat(document.getElementById('settingsGravity').value) || 0.3;
+    
+    gameState.maxParticles = ballNum;
+    gameState.particleSpeed = speed;
+    gameState.gravityStrength = gravity;
+    
+    // Adjust particle count to match new max
+    while (gameState.particles.length > gameState.maxParticles) {
+        gameState.particles.pop();
+    }
+    
+    // Spawn more if needed
+    while (gameState.particles.length < gameState.maxParticles * 0.5) {
+        spawnParticle();
+    }
+}
 
 // START GAME LOOP
 gameLoop();
