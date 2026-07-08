@@ -1,258 +1,254 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('vibeCanvas');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    let width = canvas.width = window.innerWidth;
-    let height = canvas.height = window.innerHeight;
+  const canvas = document.getElementById('vibeCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  
+  let width = canvas.width = window.innerWidth;
+  let height = canvas.height = window.innerHeight;
 
-    window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    });
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  });
 
-    // DOM Element Selectors
-    const startMenu = document.getElementById('startMenu');
-    const modePanel = document.getElementById('modePanel');
-    const leaderPanel = document.getElementById('leaderPanel');
-    const gameOverPanel = document.getElementById('gameOverPanel');
-    const gameHUD = document.getElementById('gameHUD');
-    const settingsPanel = document.getElementById('settingsPanel');
+  // UI Component bindings
+  const startMenu = document.getElementById('startMenu');
+  const gameOverMenu = document.getElementById('gameOverMenu');
+  const gameHud = document.getElementById('gameHud');
+  const settingsBtn = document.getElementById('settingsBtn');
+  const settingsPanel = document.getElementById('settingsPanel');
+  const closeBtn = document.getElementById('closeBtn');
+  
+  const btnStartGame = document.getElementById('btnStartGame');
+  const btnSelectMode = document.getElementById('btnSelectMode');
+  const btnLeaderboard = document.getElementById('btnLeaderboard');
+  const btnBackFromMode = document.getElementById('btnBackFromMode');
+  const btnBackFromLeader = document.getElementById('btnBackFromLeader');
+  const btnReturnToMenu = document.getElementById('btnReturnToMenu');
 
-    const btnStart = document.getElementById('btnStart');
-    const btnMode = document.getElementById('btnMode');
-    const btnLeader = document.getElementById('btnLeader');
-    const btnModeBack = document.getElementById('btnModeBack');
-    const btnLeaderBack = document.getElementById('btnLeaderBack');
-    const btnRestart = document.getElementById('btnRestart');
-    const settingsBtn = document.getElementById('settingsBtn');
-    const closeBtn = document.getElementById('closeBtn');
+  const mainMenuButtons = document.getElementById('mainMenuButtons');
+  const modeView = document.getElementById('modeView');
+  const leaderboardView = document.getElementById('leaderboardView');
 
-    const modeCards = document.querySelectorAll('.mode-card');
-    const inputTrails = document.getElementById('trailLength');
-    const inputLines = document.getElementById('toggleLines');
-    const valTrails = document.getElementById('valTrails');
+  // HUD and Stats DOM
+  const hudSector = document.getElementById('hudSector');
+  const hudObjective = document.getElementById('hudObjective');
+  const hudDm = document.getElementById('hudDm');
+  const hudTimer = document.getElementById('hudTimer');
+  const hudTimerContainer = document.getElementById('hudTimerContainer');
+  const finalScoreVal = document.getElementById('finalScoreVal');
+  const gameOverReason = document.getElementById('gameOverReason');
+  const shopDmWallet = document.getElementById('shopDmWallet');
 
-    // HUD Dynamic Selectors
-    const hudSector = document.getElementById('hudSector');
-    const hudScore = document.getElementById('hudScore');
-    const hudTarget = document.getElementById('hudTarget');
-    const hudDM = document.getElementById('hudDM');
-    const hudTimer = document.getElementById('hudTimer');
-    const shopDM = document.getElementById('shopDM');
-    const finalScore = document.getElementById('finalScore');
-    const gameOverReason = document.getElementById('gameOverReason');
+  // Shop upgrade buttons
+  const upgGrav = document.getElementById('upgGrav');
+  const upgBalls = document.getElementById('upgBalls');
+  const upgPulse = document.getElementById('upgPulse');
+  const toggleLines = document.getElementById('toggleLines');
 
-    // Upgrade Button Elements
-    const buyGrav = document.getElementById('buyGrav');
-    const buyMax = document.getElementById('buyMax');
-    const buyShock = document.getElementById('buyShock');
+  // Game Engine State System
+  let gameState = {
+    running: false,
+    currentMode: 'standard', // standard, survival, chaos
+    sector: 1,
+    darkMatter: 0,
+    absorbedCount: 0,
+    targetObjective: 500,
+    timeLeft: 60,
+    coreRadius: 35,
+    maxCoreRadius: 100,
+    lastSolarFlare: 0,
+    solarFlareActive: false,
+    flareTimer: 0
+  };
 
-    // Game Core State Variables
-    let currentMode = 'standard'; // standard, survival, chaos
-    let isPlaying = false;
-    let score = 0;
-    let darkMatter = 0;
-    let sector = 1;
-    let gameTime = 0; // seconds tracker
-    let timeLimit = 60; // For score attack modes
-    let intervalTimer = null;
+  // Persistent Meta Upgrades Config
+  let upgrades = {
+    gravPullLevel: 0,
+    maxBallsLevel: 0,
+    pulseLevel: 0,
+    renderLines: false
+  };
 
-    // Core Properties (Mass / Size Simulation parameters)
-    let coreRadius = 40;
-    let targetCoreRadius = 40;
-    let baseTargetScore = 500;
+  // High Scores Local Storage Management
+  let scores = { standard: 1, survival: 0, chaos: 0 };
+  if(localStorage.getItem('ev_scores')) {
+      scores = JSON.parse(localStorage.getItem('ev_scores'));
+  }
+  function saveScores() {
+      localStorage.setItem('ev_scores', JSON.stringify(scores));
+  }
 
-    // Real-Time Upgrade Constants Multipliers
-    let upgradeModifiers = {
-        gravPull: 1.0,
-        maxParticlesBonus: 0,
-        shockRadiusBonus: 1.0
-    };
+  // Active Simulation Buffers
+  const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2, active: false };
+  const pulses = [];
+  const sparks = [];
+  const swarm = [];
+  let baseHue = 190;
+  let gameInterval = null;
 
-    let config = {
-        trail: parseFloat(inputTrails.value),
-        renderLines: inputLines.checked
-    };
+  // Menu Navigation Listeners
+  btnSelectMode.addEventListener('click', () => {
+      mainMenuButtons.classList.add('hidden');
+      modeView.classList.remove('hidden');
+  });
 
-    const mouse = { x: width / 2, y: height / 2, targetX: width / 2, targetY: height / 2, active: false };
-    const pulses = [];
-    const sparks = []; 
-    const swarm = [];
-    let baseHue = 190; 
-    let solarFlareActive = false;
-    let solarFlareTimer = 0;
+  btnBackFromMode.addEventListener('click', () => {
+      modeView.classList.add('hidden');
+      mainMenuButtons.classList.remove('hidden');
+  });
 
-    // LocalStorage Leaderboard Cache Engines
-    let highScores = {
-        standard: parseInt(localStorage.getItem('highStandard')) || 1,
-        survival: parseInt(localStorage.getItem('highSurvival')) || 0,
-        chaos: parseInt(localStorage.getItem('highChaos')) || 0
-    };
-    updateLeaderboardUI();
+  btnLeaderboard.addEventListener('click', () => {
+      document.getElementById('scoreStandard').textContent = scores.standard;
+      document.getElementById('scoreSurvival').textContent = scores.survival;
+      document.getElementById('scoreChaos').textContent = scores.chaos;
+      mainMenuButtons.classList.add('hidden');
+      leaderboardView.classList.remove('hidden');
+  });
 
-    // Menu View Toggles
-    btnMode.addEventListener('click', () => { startMenu.classList.add('hidden'); modePanel.classList.remove('hidden'); });
-    btnModeBack.addEventListener('click', () => { modePanel.classList.add('hidden'); startMenu.classList.remove('hidden'); });
-    btnLeader.addEventListener('click', () => { startMenu.classList.add('hidden'); leaderPanel.classList.remove('hidden'); });
-    btnLeaderBack.addEventListener('click', () => { leaderPanel.classList.add('hidden'); startMenu.classList.remove('hidden'); });
-    settingsBtn.addEventListener('click', () => settingsPanel.classList.remove('hidden'));
-    closeBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+  btnBackFromLeader.addEventListener('click', () => {
+      leaderboardView.classList.add('hidden');
+      mainMenuButtons.classList.remove('hidden');
+  });
 
-    modeCards.forEach(card => {
-        card.addEventListener('click', () => {
-            modeCards.forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-            currentMode = card.getAttribute('data-mode');
-        });
-    });
+  // Track selected game mode setting switches
+  document.querySelectorAll('.mode-opt').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.mode-opt').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          gameState.currentMode = e.target.getAttribute('data-mode');
+      });
+  });
 
-    btnStart.addEventListener('click', startGame);
-    btnRestart.addEventListener('click', startGame);
+  // Open/Close Side Customization Panel Drawer
+  settingsBtn.addEventListener('click', () => {
+      shopDmWallet.textContent = gameState.darkMatter;
+      settingsPanel.classList.remove('hidden');
+  });
+  closeBtn.addEventListener('click', () => settingsPanel.classList.add('hidden'));
+  toggleLines.addEventListener('change', (e) => { upgrades.renderLines = e.target.checked; });
 
-    // --- QUANTUM SHOP ENGINE LOGIC ---
-    function updateShopButtons() {
-        hudDM.textContent = darkMatter;
-        shopDM.textContent = darkMatter;
+  // Handle Shop Purchases
+  upgGrav.addEventListener('click', () => buyUpgrade('grav', 50));
+  upgBalls.addEventListener('click', () => buyUpgrade('balls', 100));
+  upgPulse.addEventListener('click', () => buyUpgrade('pulse', 150));
 
-        [buyGrav, buyMax, buyShock].forEach(btn => {
-            const cost = parseInt(btn.getAttribute('data-cost'));
-            btn.disabled = darkMatter < cost;
-        });
-    }
+  function buyUpgrade(type, cost) {
+      if(gameState.darkMatter >= cost) {
+          gameState.darkMatter -= cost;
+          hudDm.textContent = gameState.darkMatter;
+          shopDmWallet.textContent = gameState.darkMatter;
+          
+          if(type === 'grav') upgrades.gravPullLevel++;
+          if(type === 'balls') {
+              upgrades.maxBallsLevel++;
+              matchSwarmCount();
+          }
+          if(type === 'pulse') upgrades.pulseLevel++;
+          
+          updateShopUiButtons();
+      }
+  }
 
-    buyGrav.addEventListener('click', () => {
-        deductDM(50);
-        upgradeModifiers.gravPull += 0.15;
-        matchSwarmCapacity();
-    });
-    buyMax.addEventListener('click', () => {
-        deductDM(100);
-        upgradeModifiers.maxParticlesBonus += 25;
-        matchSwarmCapacity();
-    });
-    buyShock.addEventListener('click', () => {
-        deductDM(150);
-        upgradeModifiers.shockRadiusBonus += 0.25;
-    });
+  function updateShopUiButtons() {
+      upgGrav.textContent = `${50 + (upgrades.gravPullLevel * 0)} DM (+${upgrades.gravPullLevel * 10}%)`;
+      upgBalls.textContent = `${100 + (upgrades.maxBallsLevel * 0)} DM (+${upgrades.maxBallsLevel * 5})`;
+      upgPulse.textContent = `${150 + (upgrades.pulseLevel * 0)} DM (+${upgrades.pulseLevel * 20}%)`;
+  }
 
-    function deductDM(amount) {
-        darkMatter -= amount;
-        updateShopButtons();
-    }
+  // Kickstart Game Configuration
+  btnStartGame.addEventListener('click', startGame);
+  btnReturnToMenu.addEventListener('click', returnToMenu);
 
-    // Slider inputs processing
-    inputTrails.addEventListener('input', e => {
-        config.trail = parseFloat(e.target.value);
-        valTrails.textContent = config.trail <= 0.1 ? "Sharp" : config.trail <= 0.25 ? "Long" : "Hyper Fluid";
-    });
-    inputLines.addEventListener('change', e => { config.renderLines = e.target.checked; });
+  function startGame() {
+      startMenu.classList.add('hidden');
+      gameOverMenu.classList.add('hidden');
+      gameHud.classList.remove('hidden');
+      
+      gameState.running = true;
+      gameState.absorbedCount = 0;
+      gameState.sector = 1;
+      gameState.timeLeft = 60;
+      gameState.coreRadius = gameState.currentMode === 'survival' ? 60 : 35;
+      gameState.solarFlareActive = false;
+      gameState.lastSolarFlare = 0;
 
-    // --- GAME ACTIONS INITIALIZATION ---
-    function startGame() {
-        startMenu.classList.add('hidden');
-        modePanel.classList.add('hidden');
-        gameOverPanel.classList.add('hidden');
-        gameHUD.classList.remove('hidden');
+      // Adjust HUD interface configurations depending on selected timeline game modes
+      if(gameState.currentMode === 'standard') {
+          gameState.targetObjective = 500;
+          hudObjective.textContent = `0 / ${gameState.targetObjective}`;
+          document.getElementById('hudObjective').parentElement.classList.remove('hidden');
+          hudTimerContainer.classList.add('hidden');
+          hudSector.parentElement.classList.remove('hidden');
+      } else if (gameState.currentMode === 'survival') {
+          gameState.timeLeft = 0; // Tracks elapsed survival time instead
+          hudTimer.textContent = "0";
+          hudTimerContainer.classList.remove('hidden');
+          document.getElementById('hudObjective').parentElement.classList.add('hidden');
+          hudSector.parentElement.classList.add('hidden');
+      } else if (gameState.currentMode === 'chaos') {
+          gameState.timeLeft = 60; // Countdown 60s
+          hudTimer.textContent = "60";
+          hudTimerContainer.classList.remove('hidden');
+          hudObjective.textContent = "0 Harvested";
+          document.getElementById('hudObjective').parentElement.classList.remove('hidden');
+          hudSector.parentElement.classList.add('hidden');
+      }
 
-        // Reset runtime values
-        isPlaying = true;
-        score = 0;
-        gameTime = 0;
-        sector = 1;
-        coreRadius = 50;
-        targetCoreRadius = 50;
-        solarFlareActive = false;
-        solarFlareTimer = 0;
+      matchSwarmCount();
+      
+      // Secondary Clock Tick Pipeline Handler
+      if(gameInterval) clearInterval(gameInterval);
+      gameInterval = setInterval(gameClockTick, 1000);
+  }
 
-        if (currentMode === 'survival') {
-            baseTargetScore = Infinity; // Survival runs forever until collapse
-            hudTarget.textContent = "∞";
-            hudSector.textContent = "SURVIVAL";
-        } else if (currentMode === 'chaos') {
-            gameTime = timeLimit;
-            hudTarget.textContent = "LIMITLESS";
-            hudSector.textContent = "CHAOS ATTACK";
-        } else {
-            baseTargetScore = 500;
-            hudTarget.textContent = baseTargetScore;
-            hudSector.textContent = sector;
-        }
+  function gameClockTick() {
+      if(!gameState.running) return;
 
-        matchSwarmCapacity();
-        updateShopButtons();
+      if(gameState.currentMode === 'survival') {
+          gameState.timeLeft++; // survival stopwatch counts up
+          hudTimer.textContent = gameState.timeLeft;
+          
+          // Shrink the core survival entity over time actively
+          gameState.coreRadius -= 1.8 + (gameState.timeLeft * 0.005);
+          if(gameState.coreRadius <= 5) {
+              triggerGameOver("The core shrank to zero mass and went supernova.");
+          }
+      } 
+      else if(gameState.currentMode === 'chaos') {
+          gameState.timeLeft--;
+          hudTimer.textContent = gameState.timeLeft;
+          
+          if(gameState.timeLeft <= 0) {
+              triggerGameOver("Time Expired! The containment grid shut down safely.");
+          }
+          
+          // Check solar flare time limits metrics counters
+          if(gameState.timeLeft % 10 === 0 && gameState.timeLeft < 60) {
+              triggerSolarFlare();
+          }
+      }
+  }
 
-        // Run independent game clock
-        if (intervalTimer) clearInterval(intervalTimer);
-        intervalTimer = setInterval(gameClockTick, 1000);
-    }
+  function triggerSolarFlare() {
+      gameState.solarFlareActive = true;
+      gameState.flareTimer = 2.5; // active inverted burst time window
+      baseHue = (baseHue + 120) % 360; // flash color fields
+  }
 
-    function gameClockTick() {
-        if (!isPlaying) return;
+  function triggerGameOver(reason) {
+      gameState.running = false;
+      clearInterval(gameInterval);
+      
+      gameOverReason.textContent = reason;
+      gameHud.classList.add('hidden');
+      gameOverMenu.classList.remove('hidden');
 
-        if (currentMode === 'standard') {
-            gameTime++;
-            hudTimer.textContent = gameTime + "s";
-        } else if (currentMode === 'survival') {
-            gameTime++;
-            hudTimer.textContent = gameTime + "s";
-            // Core actively drops size over time
-            targetCoreRadius -= (1.2 + (gameTime * 0.005)); 
-            if (coreRadius <= 5) triggerGameOver("Core collapsed due to massive mass degradation!");
-        } else if (currentMode === 'chaos') {
-            gameTime--;
-            hudTimer.textContent = gameTime + "s";
-            
-            // Handle solar flares execution intervals
-            solarFlareTimer++;
-            if (solarFlareTimer >= 10) {
-                solarFlareTimer = 0;
-                triggerSolarFlare();
-            }
-
-            if (gameTime <= 0) triggerGameOver("Time expired! Chaos harvest window closed.");
-        }
-    }
-
-    function triggerSolarFlare() {
-        solarFlareActive = true;
-        baseHue = (baseHue + 120) % 360; // Violent color shift
-        setTimeout(() => { solarFlareActive = false; }, 2500); // Inverse gravity flips back
-    }
-
-    function triggerGameOver(reason) {
-        isPlaying = false;
-        clearInterval(intervalTimer);
-        gameHUD.classList.add('hidden');
-        gameOverPanel.classList.remove('hidden');
-        gameOverReason.textContent = reason;
-        finalScore.textContent = currentMode === 'survival' ? gameTime + " seconds survived" : score + " orbs collected";
-
-        // Evaluate Leaderboard cache updates
-        if (currentMode === 'standard' && sector > highScores.standard) {
-            highScores.standard = sector;
-            localStorage.setItem('highStandard', sector);
-        } else if (currentMode === 'survival' && gameTime > highScores.survival) {
-            highScores.survival = gameTime;
-            localStorage.setItem('highSurvival', gameTime);
-        } else if (currentMode === 'chaos' && score > highScores.chaos) {
-            highScores.chaos = score;
-            localStorage.setItem('highChaos', score);
-        }
-        updateLeaderboardUI();
-    }
-
-    function updateLeaderboardUI() {
-        document.getElementById('highStandard').textContent = "Sector " + highScores.standard;
-        document.getElementById('highSurvival').textContent = highScores.survival + "s";
-        document.getElementById('highChaos').textContent = highScores.chaos + " pts";
-    }
-
-    // --- SWARM AGENT ENGINE ATOM ---
-    class Orb {
-        constructor() {
-            this.init();
-        }
-        init() {
-            // Spawn loosely outside the core
-            const angle = Math.random() * Math.PI * 2;
+      let finalScore = 0;
+      if(gameState.currentMode === 'standard') {
+          finalScore = gameState.sector;
+          finalScoreVal.textContent = `Sector ${finalScore}`;
+          if(finalScore > scores.standard) { scores.standard = finalScore; saveScores(); }
+      } else if(gameState.currentMode === 'survival') {
+          finalScore = gameState.timeLeft;
+          finalScoreVal.textContent = `${finalScore} seconds`;
