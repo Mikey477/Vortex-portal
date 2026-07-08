@@ -1,110 +1,170 @@
-<canvas id="vibeCanvas"></canvas>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="EVENT HORIZON: Quantum Harvest - An interactive particle physics game">
+    <title>EVENT HORIZON: Quantum Harvest</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Canvas Background -->
+    <canvas id="vibeCanvas" role="presentation" aria-hidden="true"></canvas>
 
-<!-- ================= START MENU OVERLAY ================= -->
-<div id="startMenu" class="overlay-container">
-  <div class="menu-box glassmorphism animate-fade-in">
-    <h1 class="game-title">EVENT HORIZON</h1>
-    <h2 class="game-subtitle">QUANTUM HARVEST</h2>
-    
-    <div id="mainMenuButtons" class="vertical-button-box">
-      <button id="startGameBtn" class="neon-btn btn-cyan">START GAME</button>
-      <button id="selectModeBtn" class="neon-btn btn-magenta">SELECT MODE</button>
-      <button id="leaderboardsBtn" class="neon-btn btn-purple">LEADERBOARDS</button>
+    <!-- Main Menu -->
+    <div id="startMenu" class="overlay-container">
+        <div class="menu-box glassmorphism">
+            <div class="menu-content">
+                <h1 class="game-title">EVENT HORIZON</h1>
+                <h2 class="game-subtitle">QUANTUM HARVEST</h2>
+                
+                <div id="mainMenuButtons" class="vertical-button-box">
+                    <button id="startGameBtn" class="neon-btn btn-cyan" aria-label="Start standard game">START GAME</button>
+                    <button id="selectModeBtn" class="neon-btn btn-magenta" aria-label="Select different game modes">SELECT MODE</button>
+                    <button id="leaderboardsBtn" class="neon-btn btn-purple" aria-label="View leaderboards">LEADERBOARDS</button>
+                </div>
+
+                <!-- Mode Selection -->
+                <div id="modeView" class="sub-view hidden">
+                    <h3>CHOOSE INSTABILITY PROFILE</h3>
+                    <div class="mode-card-container">
+                        <button id="modeStandardBtn" class="mode-card active" aria-pressed="true">
+                            <h4>Standard Sector</h4>
+                            <p>Classic progression. Absorb 500 orbs per sector to advance. Gravity increases each sector, core grows larger.</p>
+                        </button>
+                        <button id="modeGravityBtn" class="mode-card" aria-pressed="false">
+                            <h4>Gravity Well</h4>
+                            <p>Survival mode. Core continuously shrinks over time. Feed particles into the core to keep it alive. How long can you survive?</p>
+                        </button>
+                        <button id="modeChaosBtn" class="mode-card" aria-pressed="false">
+                            <h4>Chaos Storm</h4>
+                            <p>60-second score attack. Particle limits doubled. Solar flares scramble orbits every 10 seconds. Maximum harvest challenge!</p>
+                        </button>
+                    </div>
+                    <button class="back-to-menu text-btn">← BACK TO MENU</button>
+                </div>
+
+                <!-- Leaderboards -->
+                <div id="leaderboardView" class="sub-view hidden">
+                    <h3>QUANTUM RECORDS</h3>
+                    <div class="leaderboard-scores">
+                        <div class="score-row">
+                            <span>Standard Sector</span>
+                            <span id="lbStandard" class="score-value">Sector 1</span>
+                        </div>
+                        <div class="score-row">
+                            <span>Gravity Well</span>
+                            <span id="lbSurvival" class="score-value">0.0s</span>
+                        </div>
+                        <div class="score-row">
+                            <span>Chaos Storm</span>
+                            <span id="lbChaos" class="score-value">0 DM</span>
+                        </div>
+                    </div>
+                    <button class="back-to-menu text-btn">← BACK TO MENU</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Mode Selection Sub-View -->
-    <div id="modeView" class="sub-view hidden">
-      <h3>CHOOSE INSTABILITY PROFILE</h3>
-      <div class="mode-card-container">
-        <button id="modeStandardBtn" class="mode-card active">
-          <h4>Standard Sector</h4>
-          <p>Progression timeline. Absorb target quotas to advance sectors. Speed shifts scaling dynamically.</p>
-        </button>
-        <button id="modeGravityBtn" class="mode-card">
-          <h4>Gravity Well</h4>
-          <p>Survival setup. Core actively loses mass and shrinks. Feed orbs into the core to sustain equilibrium.</p>
-        </button>
-        <button id="modeChaosBtn" class="mode-card">
-          <h4>Chaos Storm</h4>
-          <p>60s Score Attack. Particle limitations doubled. Solar flares induce random gravity inversion matrix vectors.</p>
-        </button>
-      </div>
-      <button class="back-to-menu text-btn">← BACK TO MENU</button>
+    <!-- Game Over Screen -->
+    <div id="gameOverMenu" class="overlay-container hidden">
+        <div class="menu-box glassmorphism alert-box">
+            <h2 class="alert-title">CORE COLLAPSE</h2>
+            <p id="gameOverReason" class="game-over-text">The quantum portal radius reached absolute zero.</p>
+            <div class="final-score-box">
+                <span id="finalScoreVal">0 Dark Matter collected</span>
+            </div>
+            <div class="button-group">
+                <button id="restartGameBtn" class="neon-btn btn-cyan" aria-label="Restart current game mode">REINITIALIZE</button>
+                <button id="exitToMenuBtn" class="text-btn" aria-label="Return to main menu">RETURN TO MENU</button>
+            </div>
+        </div>
     </div>
 
-    <!-- Leaderboards Sub-View -->
-    <div id="leaderboardView" class="sub-view hidden">
-      <h3>QUANTUM RECORDS</h3>
-      <div class="leaderboard-scores">
-        <div class="score-row"><span>Standard Sector (Max Sector)</span><span id="lbStandard">1</span></div>
-        <div class="score-row"><span>Gravity Well (Max Survival)</span><span id="lbSurvival">0s</span></div>
-        <div class="score-row"><span>Chaos Storm (Max Harvest)</span><span id="lbChaos">0 DM</span></div>
-      </div>
-      <button class="back-to-menu text-btn">← BACK TO MENU</button>
-    </div>
-  </div>
-</div>
-<!-- ================= GAME OVER OVERLAY ================= -->
-<div id="gameOverMenu" class="overlay-container hidden">
-  <div class="menu-box glassmorphism alert-box">
-    <h2 class="alert-title">CORE COLLAPSE DETECTED</h2>
-    <p id="gameOverReason">The quantum portal radius reached absolute zero, inducing supernova state degradation.</p>
-    <div class="final-score-box">
-      <span id="finalScoreVal">0 Dark Matter collected</span>
-    </div>
-    <button id="restartGameBtn" class="neon-btn btn-cyan">REINITIALIZE SYSTEM</button>
-    <button id="exitToMenuBtn" class="text-btn">RETURN TO MASTER CONTROL</button>
-  </div>
-</div>
-
-<!-- ================= HUD DISPLAY BANNER ================= -->
-<div id="gameHud" class="hud-tophidden">
-  <div class="hud-stat">MODE: <span id="hudMode">STANDARD</span></div>
-  <div class="hud-stat">DARK MATTER: <span id="hudDm">0</span></div>
-  <div class="hud-stat">OBJECTIVE: <span id="hudObjective">0 / 500</span></div>
-</div>
-
-<!-- ================= SIDEBAR SHOP PANEL ================= -->
-<button id="settingsBtn" class="gear-btn" title="Open Upgrades Matrix">⚙️</button>
-
-<div id="settingsPanel" class="settings-panel hidden">
-  <div class="panel-header">
-    <h3>UPGRADES MATRIX</h3>
-    <button id="closeBtn" class="close-btn">&times;</button>
-  </div>
-  
-  <div class="panel-body">
-    <!-- Upgrade 1: Gravitational Pull -->
-    <div class="shop-item">
-      <div class="shop-item-info">
-        <h4>Gravitational Pull</h4>
-        <p>Increases base vector pull speed (+10% / Lvl)</p>
-        <span class="shop-lvl">Current Level: <span id="lvlGravPull">0</span></span>
-      </div>
-      <button id="buyGravPullBtn" class="shop-buy-btn">BUY [50 DM]</button>
+    <!-- Game HUD -->
+    <div id="gameHud" class="hud-tophidden" role="status" aria-live="polite">
+        <div class="hud-stat">
+            <span class="hud-label">MODE</span>
+            <span class="hud-value" id="hudMode">STANDARD</span>
+        </div>
+        <div class="hud-stat">
+            <span class="hud-label">SECTOR</span>
+            <span class="hud-value" id="hudSector">1</span>
+        </div>
+        <div class="hud-stat">
+            <span class="hud-label">DARK MATTER</span>
+            <span class="hud-value" id="hudDm">0</span>
+        </div>
+        <div class="hud-stat">
+            <span class="hud-label">PROGRESS</span>
+            <span class="hud-value" id="hudProgress">0/500</span>
+        </div>
+        <div class="hud-stat">
+            <span class="hud-label">CORE HEALTH</span>
+            <span class="hud-value" id="hudCoreHealth">100%</span>
+        </div>
     </div>
 
-    <!-- Upgrade 2: Matter Replication -->
-    <div class="shop-item">
-      <div class="shop-item-info">
-        <h4>Matter Replication</h4>
-        <p>Increases maximum simulation loop counts (+5 / Lvl)</p>
-        <span class="shop-lvl">Current Level: <span id="lvlMatterRepl">0</span></span>
-      </div>
-      <button id="buyMatterReplBtn" class="shop-buy-btn">BUY [100 DM]</button>
+    <!-- Settings Button -->
+    <button id="settingsBtn" class="gear-btn" title="Open Upgrades Panel" aria-label="Open upgrades and settings">⚙️</button>
+
+    <!-- Upgrades Panel -->
+    <div id="settingsPanel" class="settings-panel hidden" role="dialog" aria-labelledby="panelTitle" aria-hidden="true">
+        <div class="panel-header">
+            <h3 id="panelTitle">UPGRADES MATRIX</h3>
+            <button id="closeBtn" class="close-btn" aria-label="Close upgrades panel">✕</button>
+        </div>
+        
+        <div class="panel-body">
+            <div class="dark-matter-display">
+                <span class="label">Dark Matter Available</span>
+                <span class="value" id="dmDisplay">0</span> <span class="unit">DM</span>
+            </div>
+
+            <div class="shop-section">
+                <h4 class="section-title">Core Enhancements</h4>
+                
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <h5>Gravitational Pull</h5>
+                        <p>Increase particle suction speed by 10% per level</p>
+                        <span class="shop-lvl">Level <span id="lvlGravPull">0</span></span>
+                    </div>
+                    <button id="buyGravPullBtn" class="shop-buy-btn" aria-label="Buy Gravitational Pull upgrade for 50 Dark Matter">50 DM</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <h5>Matter Replication</h5>
+                        <p>Increase maximum particle cap by 5 per level</p>
+                        <span class="shop-lvl">Level <span id="lvlMatterRepl">0</span></span>
+                    </div>
+                    <button id="buyMatterReplBtn" class="shop-buy-btn" aria-label="Buy Matter Replication upgrade for 100 Dark Matter">100 DM</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <h5>Shockwave Overdrive</h5>
+                        <p>Expand click blast radius by 20% per level</p>
+                        <span class="shop-lvl">Level <span id="lvlShockwave">0</span></span>
+                    </div>
+                    <button id="buyShockwaveBtn" class="shop-buy-btn" aria-label="Buy Shockwave Overdrive upgrade for 150 Dark Matter">150 DM</button>
+                </div>
+            </div>
+
+            <div class="shop-section">
+                <h4 class="section-title">Instructions</h4>
+                <div class="instructions">
+                    <p><strong>Standard Mode:</strong> Absorb 500 particles per sector to advance. Each sector increases difficulty.</p>
+                    <p><strong>Gravity Mode:</strong> Core shrinks constantly. Feed particles to stay alive. Compete for survival time!</p>
+                    <p><strong>Chaos Mode:</strong> 60-second battle with double particles and random solar flares. Max your score!</p>
+                    <p><strong>Click to blast:</strong> Click anywhere to launch nearby particles away from your cursor.</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Upgrade 3: Shockwave Overdrive -->
-    <div class="shop-item">
-      <div class="shop-item-info">
-        <h4>Shockwave Overdrive</h4>
-        <p>Expands kinetic click blast discharge radius (+20% / Lvl)</p>
-        <span class="shop-lvl">Current Level: <span id="lvlShockwave">0</span></span>
-      </div>
-      <button id="buyShockwaveBtn" class="shop-buy-btn">BUY [150 DM]</button>
-    </div>
-  </div>
-</div>
-
-<link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
