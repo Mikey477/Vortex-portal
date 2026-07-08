@@ -29,16 +29,7 @@ canvas {
   pointer-events: none !important;
 }
 
-/* Glassmorphism Generic Design Profile */
-.glassmorphism {
-  background: rgba(8, 8, 20, 0.75);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 255, 200, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-}
-
-/* Full Screen Layout Overlay Box Elements */
+/* Fix text overlay layout rendering stack */
 .overlay-container {
   position: absolute;
   top: 0;
@@ -49,8 +40,7 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: rgba(2, 2, 8, 0.65);
-  transition: opacity 0.3s ease;
+  background: rgba(2, 2, 8, 0.85);
 }
 
 .menu-box {
@@ -59,8 +49,16 @@ canvas {
   text-align: center;
 }
 
+.glassmorphism {
+  background: rgba(8, 8, 20, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 255, 200, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+}
+
 .game-title {
-  font-size: 2.8rem;
+  font-size: 2.5rem;
   letter-spacing: 6px;
   color: #00ffcc;
   text-shadow: 0 0 15px rgba(0, 255, 200, 0.6);
@@ -71,10 +69,7 @@ canvas {
   letter-spacing: 4px;
   color: #ff007f;
   margin-bottom: 35px;
-  text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
 }
-
-/* Cyber Terminal Style Button Grouping */
 .vertical-button-box {
   display: flex;
   flex-direction: column;
@@ -112,11 +107,9 @@ canvas {
   cursor: pointer;
   letter-spacing: 1px;
   margin-top: 20px;
-  transition: color 0.2s;
 }
 .text-btn:hover { color: #fff; text-decoration: underline; }
 
-/* Submenus Selection Display Models */
 .sub-view h3 {
   font-size: 1rem;
   letter-spacing: 2px;
@@ -139,7 +132,6 @@ canvas {
   cursor: pointer;
   color: #fff;
   font-family: inherit;
-  transition: all 0.2s;
 }
 .mode-card h4 { color: #ff007f; font-size: 0.95rem; margin-bottom: 4px; }
 .mode-card p { font-size: 0.75rem; color: #a0aec0; line-height: 1.3; }
@@ -148,7 +140,6 @@ canvas {
   background: rgba(0, 255, 200, 0.05);
 }
 
-/* Leaderboards display board values mapping */
 .leaderboard-scores {
   display: flex;
   flex-direction: column;
@@ -164,19 +155,16 @@ canvas {
 }
 .score-row span:last-child { color: #00ffcc; font-weight: bold; }
 
-/* Game Over Supernova State */
 .alert-box { border-color: #ff007f; }
 .alert-title { color: #ff007f; font-size: 1.6rem; letter-spacing: 3px; margin-bottom: 10px; }
 .final-score-box { margin: 20px 0; font-size: 1.1rem; color: #00ffcc; font-weight: bold; }
-
-/* In-Game Active Dashboard Hud Banner Elements */
 #gameHud {
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
-  background: rgba(5, 5, 12, 0.8);
+  background: rgba(5, 5, 12, 0.95);
   border: 1px solid rgba(0, 255, 200, 0.15);
   border-top: none;
   border-bottom-left-radius: 12px;
@@ -190,7 +178,6 @@ canvas {
 .hud-stat { font-size: 0.85rem; letter-spacing: 2px; font-weight: bold; }
 .hud-stat span { color: #00ffcc; }
 
-/* Settings Upgrade Sidebar Panel Framework Layout */
 .gear-btn {
   position: absolute;
   top: 20px;
@@ -204,9 +191,8 @@ canvas {
   border-radius: 50%;
   cursor: pointer;
   backdrop-filter: blur(12px);
-  transition: transform 0.4s ease, background 0.2s;
 }
-.gear-btn:hover { transform: rotate(60deg) scale(1.1); border-color: #00ffcc; }
+.gear-btn:hover { border-color: #00ffcc; }
 
 .settings-panel {
   position: absolute;
@@ -214,7 +200,7 @@ canvas {
   right: 20px;
   z-index: 101;
   width: 340px;
-  background: rgba(8, 8, 16, 0.85);
+  background: rgba(8, 8, 16, 0.95);
   backdrop-filter: blur(25px);
   border: 1px solid rgba(0, 255, 200, 0.2);
   border-radius: 20px;
@@ -232,7 +218,6 @@ canvas {
 .close-btn { background: none; border: none; color: #a0aec0; font-size: 26px; cursor: pointer; line-height: 1; }
 .close-btn:hover { color: #ff007f; }
 
-/* Upgrade Marketplace List Layout Rows */
 .shop-item {
   display: flex;
   justify-content: space-between;
@@ -258,6 +243,5 @@ canvas {
   font-weight: bold;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
 }
-.shop-buy-btn:hover { background: #00ffcc; color: #020205; box-shadow: 0 0 10px #00ffcc; }
+.shop-buy-btn:hover { background: #00ffcc; color: #020205; }
