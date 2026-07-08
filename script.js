@@ -24,6 +24,7 @@ let gameStartTime = 0;
 let lastFlareTime = 0;
 const FLARE_INTERVAL = 10000; // 10 seconds for chaos mode
 let waveTimeout = null;
+let frameCount = 0;
 
 // ============ UPGRADES ============
 let upgrades = {
@@ -80,28 +81,37 @@ class Particle {
         this.color = color;
         this.life = 1;
         this.trail = [];
+        this.maxTrailLength = 8;
     }
 
     update() {
+        // Apply friction
+        this.vx *= 0.998;
+        this.vy *= 0.998;
+        
         this.x += this.vx;
         this.y += this.vy;
-        this.life -= 0.01;
+        this.life -= 0.008;
         
         // Trail effect
-        if (this.trail.length > 6) this.trail.shift();
+        if (this.trail.length > this.maxTrailLength) this.trail.shift();
         this.trail.push({ x: this.x, y: this.y, life: this.life });
     }
 
     draw(ctx) {
-        // Trail
+        if (this.life <= 0) return;
+
+        // Trail with proper blending
         if (this.trail.length > 1) {
             ctx.strokeStyle = this.color;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             for (let i = 0; i < this.trail.length - 1; i++) {
                 const current = this.trail[i];
                 const next = this.trail[i + 1];
-                const alpha = (current.life * 0.4) * (i / this.trail.length);
-                ctx.globalAlpha = Math.max(0, alpha);
-                ctx.lineWidth = this.size * 0.3;
+                const alpha = Math.max(0, current.life * 0.3 * (i / this.trail.length));
+                ctx.globalAlpha = alpha;
+                ctx.lineWidth = this.size * 0.4;
                 ctx.beginPath();
                 ctx.moveTo(current.x, current.y);
                 ctx.lineTo(next.x, next.y);
@@ -110,18 +120,19 @@ class Particle {
         }
 
         // Particle glow
-        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 2.5);
+        const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size * 3);
         gradient.addColorStop(0, this.color);
+        gradient.addColorStop(0.6, this.color.replace(/[^,]+$/, '0.5)'));
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
         
-        ctx.globalAlpha = this.life * 0.8;
+        ctx.globalAlpha = Math.max(0, this.life * 0.6);
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+        ctx.arc(this.x, this.y, this.size * 3, 0, Math.PI * 2);
         ctx.fill();
 
         // Particle core
-        ctx.globalAlpha = this.life;
+        ctx.globalAlpha = Math.max(0, this.life * 0.9);
         ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -136,71 +147,80 @@ function drawBackground() {
     ctx.fillStyle = '#0a0e27';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    // Dynamic grid
-    ctx.strokeStyle = 'rgba(0, 255, 200, 0.05)';
-    ctx.lineWidth = 1;
-    const gridSize = 70;
-    for (let x = 0; x < canvasWidth; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvasHeight);
-        ctx.stroke();
-    }
-    for (let y = 0; y < canvasHeight; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvasWidth, y);
-        ctx.stroke();
+    // Optimized grid - only draw every other frame
+    if (frameCount % 2 === 0) {
+        ctx.strokeStyle = 'rgba(0, 255, 200, 0.04)';
+        ctx.lineWidth = 1;
+        const gridSize = 80;
+        const offsetX = (frameCount / 20) % gridSize;
+        
+        for (let x = -offsetX; x < canvasWidth; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvasHeight);
+            ctx.stroke();
+        }
+        for (let y = -offsetX; y < canvasHeight; y += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvasWidth, y);
+            ctx.stroke();
+        }
     }
 }
 
 // ============ CORE DRAWING ============
 function drawCore() {
-    const pulseEffect = Math.sin(Date.now() * 0.004) * 4;
-    const effectiveRadius = Math.max(5, coreRadius + pulseEffect);
+    const pulseEffect = Math.sin(Date.now() * 0.003) * 3;
+    const effectiveRadius = Math.max(8, coreRadius + pulseEffect);
     
     // Determine core color based on mode
     let coreColor = '#00ffcc';
-    let glowColor = 'rgba(0, 255, 200, 0.6)';
+    let glowColor = 'rgba(0, 255, 200, 0.7)';
     
     if (currentMode === 'gravity') {
         coreColor = '#ff00ff';
-        glowColor = 'rgba(255, 0, 255, 0.6)';
+        glowColor = 'rgba(255, 0, 255, 0.7)';
     } else if (currentMode === 'chaos') {
-        coreColor = '#ffaa00';
-        glowColor = 'rgba(255, 170, 0, 0.6)';
+        coreColor = '#00d4ff';
+        glowColor = 'rgba(0, 212, 255, 0.7)';
     } else if (sector > 1) {
-        const hue = Math.max(0, 160 - sector * 15);
+        const hue = Math.max(0, Math.min(360, 160 - sector * 12));
         coreColor = `hsl(${hue}, 100%, 50%)`;
-        glowColor = `hsla(${hue}, 100%, 50%, 0.5)`;
+        glowColor = `hsla(${hue}, 100%, 50%, 0.6)`;
     }
 
-    // Outer glow
-    const gradient = ctx.createRadialGradient(coreX, coreY, 0, coreX, coreY, effectiveRadius + 45);
-    gradient.addColorStop(0, glowColor);
-    gradient.addColorStop(0.5, glowColor.replace('0.6', '0.2'));
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(coreX, coreY, effectiveRadius + 45, 0, Math.PI * 2);
-    ctx.fill();
+    // Outer glow - multiple rings for better effect
+    for (let i = 3; i > 0; i--) {
+        const r = effectiveRadius + (15 * i);
+        const gradient = ctx.createRadialGradient(coreX, coreY, effectiveRadius, coreX, coreY, r);
+        gradient.addColorStop(0, glowColor.replace(/[\d.]+\)$/, `${0.3 / i})`));
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(coreX, coreY, r, 0, Math.PI * 2);
+        ctx.fill();
+    }
 
-    // Core body
+    // Core body with solid fill
     ctx.fillStyle = coreColor;
     ctx.beginPath();
     ctx.arc(coreX, coreY, effectiveRadius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Inner core
-    ctx.fillStyle = '#0a0e27';
+    // Inner core highlight
+    const innerGradient = ctx.createRadialGradient(coreX - 5, coreY - 5, 0, coreX, coreY, effectiveRadius * 0.6);
+    innerGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+    innerGradient.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+    ctx.fillStyle = innerGradient;
     ctx.beginPath();
-    ctx.arc(coreX, coreY, effectiveRadius * 0.5, 0, Math.PI * 2);
+    ctx.arc(coreX, coreY, effectiveRadius * 0.6, 0, Math.PI * 2);
     ctx.fill();
 
     // Core outline
     ctx.strokeStyle = coreColor;
-    ctx.lineWidth = 2.5;
-    ctx.globalAlpha = 0.8;
+    ctx.lineWidth = 3;
+    ctx.globalAlpha = 0.9;
     ctx.beginPath();
     ctx.arc(coreX, coreY, effectiveRadius, 0, Math.PI * 2);
     ctx.stroke();
@@ -209,78 +229,84 @@ function drawCore() {
 
 // ============ PARTICLE SPAWNING ============
 function spawnParticles(x, y, count = 8) {
-    const colors = ['#00ffcc', '#00d4ff', '#9d4edd', '#00ff88', '#00ffcc'];
+    const colors = ['#00ffcc', '#00d4ff', '#9d4edd', '#00ff88'];
     for (let i = 0; i < count; i++) {
-        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
-        const speed = 2 + Math.random() * 3;
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+        const speed = 1.5 + Math.random() * 3.5;
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
         const color = colors[Math.floor(Math.random() * colors.length)];
-        particles.push(new Particle(x, y, vx, vy, 5, color));
+        particles.push(new Particle(x, y, vx, vy, 4, color));
     }
 }
 
 function spawnWave() {
     if (!gameRunning) return;
 
-    const maxParticles = 100 + upgrades.matterRepl * 5 + (currentMode === 'chaos' ? 50 : 0);
-    const waveSize = Math.min(12 + (sector - 1) * 2, 30);
+    const maxParticles = 100 + upgrades.matterRepl * 5 + (currentMode === 'chaos' ? 60 : 0);
+    const waveSize = Math.min(10 + sector, 25);
     
     for (let i = 0; i < waveSize && particles.length < maxParticles; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const distance = 250 + Math.random() * 350;
+        const distance = 280 + Math.random() * 320;
         const x = coreX + Math.cos(angle) * distance;
         const y = coreY + Math.sin(angle) * distance;
-        const speed = 0.8 + Math.random() * 2 + (sector - 1) * 0.25;
+        const speed = 0.9 + Math.random() * 1.8 + (sector - 1) * 0.2;
         const vx = -Math.cos(angle) * speed;
         const vy = -Math.sin(angle) * speed;
-        particles.push(new Particle(x, y, vx, vy, 5, '#00ffcc'));
+        particles.push(new Particle(x, y, vx, vy, 4, '#00ffcc'));
     }
 
-    waveTimeout = setTimeout(spawnWave, 900);
+    waveTimeout = setTimeout(spawnWave, 850);
 }
 
 // ============ GRAVITY & COLLISION ============
 function applyGravity() {
-    particles.forEach(p => {
+    const gravityStrength = 0.08 * (1 + upgrades.gravPull * 0.14);
+    
+    for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         const dx = coreX - p.x;
         const dy = coreY - p.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const pullStrength = 0.07 * (1 + upgrades.gravPull * 0.12);
+        const distSq = dx * dx + dy * dy;
+        const dist = Math.sqrt(distSq);
         
-        if (dist > 0) {
-            p.vx += (dx / dist) * pullStrength;
-            p.vy += (dy / dist) * pullStrength;
+        if (dist > 0.1) {
+            const force = gravityStrength / Math.max(1, dist * 0.01);
+            p.vx += (dx / dist) * force;
+            p.vy += (dy / dist) * force;
         }
 
-        // Boundary wrap
-        if (p.x < -100) p.x = canvasWidth + 100;
-        if (p.x > canvasWidth + 100) p.x = -100;
-        if (p.y < -100) p.y = canvasHeight + 100;
-        if (p.y > canvasHeight + 100) p.y = -100;
-    });
+        // Boundary wrap with padding
+        const padding = 150;
+        if (p.x < -padding) p.x = canvasWidth + padding;
+        if (p.x > canvasWidth + padding) p.x = -padding;
+        if (p.y < -padding) p.y = canvasHeight + padding;
+        if (p.y > canvasHeight + padding) p.y = -padding;
+    }
 }
 
 function checkCollisions() {
+    const collisionRadius = coreRadius + 8;
     for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         const dx = coreX - p.x;
         const dy = coreY - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
-        if (dist < coreRadius + p.size) {
+        if (dist < collisionRadius) {
             particles.splice(i, 1);
-            darkMatter += 1;
-            progress += 1;
+            darkMatter++;
+            progress++;
 
             if (currentMode === 'standard') {
                 if (progress >= 500) {
                     sector++;
                     progress = 0;
-                    coreMaxRadius = 50 + sector * 5;
+                    coreMaxRadius = 50 + sector * 4;
                 }
             } else if (currentMode === 'gravity') {
-                coreHealth = Math.min(coreHealth + 1.5, 100);
+                coreHealth = Math.min(coreHealth + 2, 100);
             } else if (currentMode === 'chaos') {
                 progress += 1;
             }
@@ -297,17 +323,17 @@ function updateGame() {
 
     // Mode-specific updates
     if (currentMode === 'standard') {
-        // Standard mode doesn't need special updates
+        // Nothing special needed
     } else if (currentMode === 'gravity') {
-        coreHealth -= 0.08;
+        coreHealth -= 0.06;
         if (coreHealth <= 0) {
             endGame(`Survived for ${survivalTime.toFixed(1)}s`);
         }
-        coreRadius = (coreHealth / 100) * coreMaxRadius;
+        coreRadius = Math.max(8, (coreHealth / 100) * coreMaxRadius);
     } else if (currentMode === 'chaos') {
         const elapsed = (Date.now() - gameStartTime) / 1000;
         if (elapsed > 60) {
-            endGame(`Final Score: ${progress} particles harvested`);
+            endGame(`Final Score: ${progress} particles`);
         }
         
         // Solar flares every 10 seconds
@@ -321,12 +347,12 @@ function updateGame() {
 }
 
 function triggerSolarFlare() {
-    // Reverse gravity briefly for particles
+    // Add visual feedback
     particles.forEach(p => {
-        p.vx *= -0.6;
-        p.vy *= -0.6;
+        p.vx *= -0.7;
+        p.vy *= -0.7;
     });
-    spawnParticles(canvasWidth / 2, canvasHeight / 2, 20);
+    spawnParticles(canvasWidth / 2, canvasHeight / 2, 25);
 }
 
 // ============ HUD UPDATE ============
@@ -338,24 +364,24 @@ function updateHUD() {
     const hudCoreHealth = document.getElementById('hudCoreHealth');
 
     if (currentMode === 'standard') {
-        hudMode.textContent = 'STANDARD';
-        hudSector.textContent = sector;
-        hudProgress.textContent = `${progress}/500`;
-        hudCoreHealth.textContent = '100%';
+        if (hudMode) hudMode.textContent = 'STANDARD';
+        if (hudSector) hudSector.textContent = sector;
+        if (hudProgress) hudProgress.textContent = `${progress}/500`;
+        if (hudCoreHealth) hudCoreHealth.textContent = '100%';
     } else if (currentMode === 'gravity') {
-        hudMode.textContent = 'SURVIVAL';
-        hudSector.textContent = '⏱';
-        hudProgress.textContent = `${survivalTime.toFixed(1)}s`;
-        hudCoreHealth.textContent = `${Math.max(0, Math.floor(coreHealth))}%`;
+        if (hudMode) hudMode.textContent = 'SURVIVAL';
+        if (hudSector) hudSector.textContent = '⏱';
+        if (hudProgress) hudProgress.textContent = `${survivalTime.toFixed(1)}s`;
+        if (hudCoreHealth) hudCoreHealth.textContent = `${Math.max(0, Math.floor(coreHealth))}%`;
     } else if (currentMode === 'chaos') {
-        hudMode.textContent = 'CHAOS';
+        if (hudMode) hudMode.textContent = 'CHAOS';
         const timeLeft = Math.max(0, 60 - Math.floor((Date.now() - gameStartTime) / 1000));
-        hudSector.textContent = `${timeLeft}s`;
-        hudProgress.textContent = `${progress}`;
-        hudCoreHealth.textContent = '100%';
+        if (hudSector) hudSector.textContent = `${timeLeft}s`;
+        if (hudProgress) hudProgress.textContent = `${progress}`;
+        if (hudCoreHealth) hudCoreHealth.textContent = '100%';
     }
 
-    hudDm.textContent = darkMatter;
+    if (hudDm) hudDm.textContent = darkMatter;
 }
 
 // ============ GAME LIFECYCLE ============
@@ -370,11 +396,18 @@ function startGame(mode) {
     survivalTime = 0;
     gameStartTime = Date.now();
     lastFlareTime = Date.now();
+    frameCount = 0;
 
     document.getElementById('startMenu').classList.add('hidden');
     document.getElementById('gameOverMenu').classList.add('hidden');
     document.getElementById('gameHud').classList.remove('hud-tophidden');
     document.getElementById('settingsPanel').classList.add('hidden');
+
+    // Close panel on mobile
+    if (window.innerWidth < 768) {
+        const settingsBtn = document.getElementById('settingsBtn');
+        if (settingsBtn) settingsBtn.style.display = 'block';
+    }
 
     spawnWave();
 }
@@ -383,8 +416,10 @@ function endGame(reason) {
     gameRunning = false;
     clearTimeout(waveTimeout);
     
-    document.getElementById('gameOverReason').textContent = reason;
-    document.getElementById('finalScoreVal').textContent = `${darkMatter} Dark Matter collected`;
+    const gameOverReason = document.getElementById('gameOverReason');
+    const finalScoreVal = document.getElementById('finalScoreVal');
+    if (gameOverReason) gameOverReason.textContent = reason;
+    if (finalScoreVal) finalScoreVal.textContent = `${darkMatter} Dark Matter collected`;
 
     // Update leaderboard
     if (currentMode === 'standard') {
@@ -403,14 +438,19 @@ function endGame(reason) {
 
 // ============ ANIMATION LOOP ============
 function gameLoop() {
+    frameCount++;
+    
     drawBackground();
 
     // Update and draw particles
-    particles = particles.filter(p => p.life > 0);
-    particles.forEach(p => {
-        p.update();
-        p.draw(ctx);
-    });
+    for (let i = particles.length - 1; i >= 0; i--) {
+        if (particles[i].life <= 0) {
+            particles.splice(i, 1);
+        } else {
+            particles[i].update();
+            particles[i].draw(ctx);
+        }
+    }
 
     updateGame();
     updateHUD();
@@ -429,41 +469,50 @@ document.addEventListener('click', (e) => {
     const clickX = e.clientX - rect.left;
     const clickY = e.clientY - rect.top;
 
-    const blastRadius = 120 + upgrades.shockwave * 25;
+    const blastRadius = 130 + upgrades.shockwave * 30;
     let hitCount = 0;
 
-    particles.forEach(p => {
+    for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
         const dx = p.x - clickX;
         const dy = p.y - clickY;
-        const dist = Math.sqrt(dx * dx + dy * dy);
+        const distSq = dx * dx + dy * dy;
+        const blastRadiusSq = blastRadius * blastRadius;
 
-        if (dist < blastRadius) {
-            const force = 7 * (1 - dist / blastRadius);
-            const dist_safe = Math.max(0.1, dist);
+        if (distSq < blastRadiusSq) {
+            const dist = Math.sqrt(distSq);
+            const force = 8 * Math.max(0, 1 - dist / blastRadius);
+            const dist_safe = Math.max(1, dist);
             p.vx = (dx / dist_safe) * force;
             p.vy = (dy / dist_safe) * force;
             hitCount++;
         }
-    });
+    }
 
-    spawnParticles(clickX, clickY, Math.min(Math.max(hitCount / 3, 3), 15));
+    const spawnCount = Math.min(Math.max(hitCount / 4, 4), 18);
+    spawnParticles(clickX, clickY, spawnCount);
 });
 
 // ============ MENU BUTTONS ============
 function setupMenuHandlers() {
-    document.getElementById('startGameBtn').addEventListener('click', () => startGame('standard'));
+    const startBtn = document.getElementById('startGameBtn');
+    const selectModeBtn = document.getElementById('selectModeBtn');
+    const leaderboardsBtn = document.getElementById('leaderboardsBtn');
 
-    document.getElementById('selectModeBtn').addEventListener('click', () => {
+    if (startBtn) startBtn.addEventListener('click', () => startGame('standard'));
+    if (selectModeBtn) selectModeBtn.addEventListener('click', () => {
         document.getElementById('mainMenuButtons').classList.add('hidden');
         document.getElementById('modeView').classList.remove('hidden');
     });
-
-    document.getElementById('leaderboardsBtn').addEventListener('click', () => {
+    if (leaderboardsBtn) leaderboardsBtn.addEventListener('click', () => {
         document.getElementById('mainMenuButtons').classList.add('hidden');
         document.getElementById('leaderboardView').classList.remove('hidden');
-        document.getElementById('lbStandard').textContent = `Sector ${leaderboard.standard}`;
-        document.getElementById('lbSurvival').textContent = leaderboard.survival;
-        document.getElementById('lbChaos').textContent = `${leaderboard.chaos} DM`;
+        const lbStandard = document.getElementById('lbStandard');
+        const lbSurvival = document.getElementById('lbSurvival');
+        const lbChaos = document.getElementById('lbChaos');
+        if (lbStandard) lbStandard.textContent = `Sector ${leaderboard.standard}`;
+        if (lbSurvival) lbSurvival.textContent = leaderboard.survival;
+        if (lbChaos) lbChaos.textContent = `${leaderboard.chaos} DM`;
     });
 
     document.querySelectorAll('.back-to-menu').forEach(btn => {
@@ -474,16 +523,22 @@ function setupMenuHandlers() {
         });
     });
 
-    document.getElementById('modeStandardBtn').addEventListener('click', () => startGame('standard'));
-    document.getElementById('modeGravityBtn').addEventListener('click', () => startGame('gravity'));
-    document.getElementById('modeChaosBtn').addEventListener('click', () => startGame('chaos'));
+    const modeStandardBtn = document.getElementById('modeStandardBtn');
+    const modeGravityBtn = document.getElementById('modeGravityBtn');
+    const modeChaosBtn = document.getElementById('modeChaosBtn');
 
-    document.getElementById('restartGameBtn').addEventListener('click', () => {
+    if (modeStandardBtn) modeStandardBtn.addEventListener('click', () => startGame('standard'));
+    if (modeGravityBtn) modeGravityBtn.addEventListener('click', () => startGame('gravity'));
+    if (modeChaosBtn) modeChaosBtn.addEventListener('click', () => startGame('chaos'));
+
+    const restartBtn = document.getElementById('restartGameBtn');
+    const exitBtn = document.getElementById('exitToMenuBtn');
+
+    if (restartBtn) restartBtn.addEventListener('click', () => {
         document.getElementById('gameOverMenu').classList.add('hidden');
         startGame(currentMode);
     });
-
-    document.getElementById('exitToMenuBtn').addEventListener('click', () => {
+    if (exitBtn) exitBtn.addEventListener('click', () => {
         document.getElementById('gameOverMenu').classList.add('hidden');
         document.getElementById('startMenu').classList.remove('hidden');
         document.getElementById('gameHud').classList.add('hud-tophidden');
@@ -492,32 +547,51 @@ function setupMenuHandlers() {
 
 // ============ SETTINGS PANEL ============
 function setupSettingsHandlers() {
-    document.getElementById('settingsBtn').addEventListener('click', (e) => {
+    const settingsBtn = document.getElementById('settingsBtn');
+    const closeBtn = document.getElementById('closeBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+
+    if (settingsBtn) settingsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        document.getElementById('settingsPanel').classList.toggle('hidden');
-        if (!document.getElementById('settingsPanel').classList.contains('hidden')) {
-            document.getElementById('settingsPanel').setAttribute('aria-hidden', 'false');
-        } else {
-            document.getElementById('settingsPanel').setAttribute('aria-hidden', 'true');
-        }
+        settingsPanel.classList.toggle('hidden');
+        settingsPanel.setAttribute('aria-hidden', settingsPanel.classList.contains('hidden'));
     });
 
-    document.getElementById('closeBtn').addEventListener('click', () => {
-        document.getElementById('settingsPanel').classList.add('hidden');
-        document.getElementById('settingsPanel').setAttribute('aria-hidden', 'true');
+    if (closeBtn) closeBtn.addEventListener('click', () => {
+        settingsPanel.classList.add('hidden');
+        settingsPanel.setAttribute('aria-hidden', 'true');
+    });
+
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!settingsPanel.contains(e.target) && e.target !== settingsBtn) {
+            if (!settingsPanel.classList.contains('hidden')) {
+                settingsPanel.classList.add('hidden');
+                settingsPanel.setAttribute('aria-hidden', 'true');
+            }
+        }
     });
 }
 
 function updateUpgradeDisplay() {
-    document.getElementById('dmDisplay').textContent = darkMatter;
-    document.getElementById('lvlGravPull').textContent = upgrades.gravPull;
-    document.getElementById('lvlMatterRepl').textContent = upgrades.matterRepl;
-    document.getElementById('lvlShockwave').textContent = upgrades.shockwave;
+    const dmDisplay = document.getElementById('dmDisplay');
+    const lvlGravPull = document.getElementById('lvlGravPull');
+    const lvlMatterRepl = document.getElementById('lvlMatterRepl');
+    const lvlShockwave = document.getElementById('lvlShockwave');
+
+    if (dmDisplay) dmDisplay.textContent = darkMatter;
+    if (lvlGravPull) lvlGravPull.textContent = upgrades.gravPull;
+    if (lvlMatterRepl) lvlMatterRepl.textContent = upgrades.matterRepl;
+    if (lvlShockwave) lvlShockwave.textContent = upgrades.shockwave;
 }
 
 // ============ UPGRADES ============
 function setupUpgradeHandlers() {
-    document.getElementById('buyGravPullBtn').addEventListener('click', () => {
+    const buyGravPullBtn = document.getElementById('buyGravPullBtn');
+    const buyMatterReplBtn = document.getElementById('buyMatterReplBtn');
+    const buyShockwaveBtn = document.getElementById('buyShockwaveBtn');
+
+    if (buyGravPullBtn) buyGravPullBtn.addEventListener('click', () => {
         if (darkMatter >= 50) {
             darkMatter -= 50;
             upgrades.gravPull++;
@@ -526,7 +600,7 @@ function setupUpgradeHandlers() {
         }
     });
 
-    document.getElementById('buyMatterReplBtn').addEventListener('click', () => {
+    if (buyMatterReplBtn) buyMatterReplBtn.addEventListener('click', () => {
         if (darkMatter >= 100) {
             darkMatter -= 100;
             upgrades.matterRepl++;
@@ -535,7 +609,7 @@ function setupUpgradeHandlers() {
         }
     });
 
-    document.getElementById('buyShockwaveBtn').addEventListener('click', () => {
+    if (buyShockwaveBtn) buyShockwaveBtn.addEventListener('click', () => {
         if (darkMatter >= 150) {
             darkMatter -= 150;
             upgrades.shockwave++;

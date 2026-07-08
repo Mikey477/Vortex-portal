@@ -12,6 +12,7 @@ html, body {
     font-family: 'Courier New', Courier, monospace;
     color: #ffffff;
     user-select: none;
+    -webkit-user-select: none;
 }
 
 canvas {
@@ -22,6 +23,8 @@ canvas {
     height: 100%;
     z-index: 1;
     display: block;
+    image-rendering: crisp-edges;
+    background: #0a0e27;
 }
 
 .hidden {
@@ -43,6 +46,16 @@ canvas {
     align-items: center;
     background: rgba(10, 14, 39, 0.88);
     backdrop-filter: blur(12px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .menu-box {
@@ -58,7 +71,7 @@ canvas {
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-30px) scale(0.95);
+        transform: translateY(-40px) scale(0.92);
     }
     to {
         opacity: 1;
@@ -119,10 +132,15 @@ canvas {
     transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     text-transform: uppercase;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    user-select: none;
 }
 
 .neon-btn:active {
     transform: scale(0.98);
+}
+
+.neon-btn:focus {
+    outline: none;
 }
 
 .btn-cyan {
@@ -163,6 +181,7 @@ canvas {
 
 .sub-view {
     margin-top: 20px;
+    animation: slideIn 0.3s ease;
 }
 
 .sub-view h3 {
@@ -192,6 +211,7 @@ canvas {
     font-family: inherit;
     transition: all 0.3s ease;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    user-select: none;
 }
 
 .mode-card h4 {
@@ -227,6 +247,7 @@ canvas {
     transition: all 0.25s ease;
     margin-top: 15px;
     padding: 8px 0;
+    user-select: none;
 }
 
 .text-btn:hover {
@@ -322,7 +343,8 @@ canvas {
     box-shadow: 0 0 30px rgba(0, 255, 200, 0.15), 0 8px 32px rgba(0, 0, 0, 0.7);
     flex-wrap: wrap;
     justify-content: center;
-    max-width: 90%;
+    max-width: 95%;
+    pointer-events: none;
 }
 
 .hud-tophidden {
@@ -384,11 +406,11 @@ canvas {
 /* Settings Panel */
 .settings-panel {
     position: fixed;
-    top: 25px;
+    top: 100px;
     right: 25px;
     z-index: 101;
     width: 400px;
-    max-height: 90vh;
+    max-height: 85vh;
     background: rgba(20, 24, 50, 0.95);
     backdrop-filter: blur(35px);
     border: 1.5px solid rgba(0, 255, 200, 0.3);
@@ -397,6 +419,7 @@ canvas {
     overflow-y: auto;
     overflow-x: hidden;
     box-shadow: 0 0 60px rgba(0, 255, 200, 0.1), 0 20px 60px rgba(0, 0, 0, 0.9);
+    animation: slideIn 0.4s ease;
 }
 
 .panel-header {
@@ -554,6 +577,7 @@ canvas {
     white-space: nowrap;
     text-transform: uppercase;
     box-shadow: 0 0 10px rgba(0, 255, 200, 0.1);
+    user-select: none;
 }
 
 .shop-buy-btn:hover {
@@ -574,6 +598,7 @@ canvas {
     cursor: not-allowed;
     opacity: 0.4;
     box-shadow: none;
+    transform: scale(1);
 }
 
 .instructions {
@@ -635,14 +660,19 @@ canvas {
     }
 
     .settings-panel {
-        width: 90%;
-        max-width: 400px;
+        width: 95%;
+        max-width: 380px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 70px;
     }
 
     #gameHud {
         gap: 20px;
-        padding: 12px 20px;
-        font-size: 0.85rem;
+        padding: 12px 15px;
+        font-size: 0.8rem;
+        top: 10px;
     }
 
     .hud-stat {
@@ -651,5 +681,13 @@ canvas {
 
     .hud-value {
         font-size: 0.95rem;
+    }
+
+    .gear-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+        top: 15px;
+        right: 15px;
     }
 }
