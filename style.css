@@ -1,0 +1,218 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html {
+  width: 100%;
+  height: 100%;
+  background: #020205;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  user-select: none;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Gear Button Layout */
+.gear-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 24px;
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(12px);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.2s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.gear-btn:hover {
+  transform: rotate(60deg) scale(1.1);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #00ffcc;
+}
+
+/* Overhauled Glass Dashboard Panel */
+.settings-panel {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 101;
+  width: 330px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  background: rgba(8, 8, 16, 0.82);
+  backdrop-filter: blur(25px);
+  border: 1px solid rgba(0, 255, 200, 0.2);
+  border-radius: 20px;
+  padding: 24px;
+  color: #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform-origin: top right;
+}
+
+/* Custom Panel Scrollbar styling */
+.settings-panel::-webkit-scrollbar {
+  width: 4px;
+}
+.settings-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 200, 0.3);
+  border-radius: 2px;
+}
+
+.settings-panel.hidden {
+  opacity: 0;
+  transform: scale(0.8) translate(20px, -20px);
+  pointer-events: none;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+}
+
+.panel-header h3 {
+  font-size: 13px;
+  letter-spacing: 2.5px;
+  color: #00ffcc;
+  text-shadow: 0 0 10px rgba(0, 255, 200, 0.3);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  font-size: 26px;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: #ff007f;
+}
+
+.control-group {
+  margin-bottom: 18px;
+}
+
+.control-group label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.control-group label span {
+  color: #00ffcc;
+  font-weight: 600;
+}
+
+.sub-hint {
+  display: block;
+  font-size: 10px;
+  color: #ff007f;
+  margin-top: 3px;
+  opacity: 0.85;
+}
+
+/* Slick Custom Dropdown Select */
+.custom-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+.custom-select option {
+  background: #0a0a14;
+  color: #fff;
+}
+
+/* Neon Sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #00ffcc;
+  cursor: pointer;
+  box-shadow: 0 0 8px #00ffcc;
+}
+
+/* iOS Style Toggle Switch */
+.checkbox-group {
+  margin-top: 22px;
+  margin-bottom: 22px;
+}
+.toggle-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  cursor: pointer;
+  position: relative;
+}
+.toggle-container input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.checkmark {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  background-color: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  transition: .3s;
+}
+.checkmark:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .3s;
+}
+input:checked + .checkmark {
+  background-color: #00ffcc;
+  box-shadow: 0 0 10px rgba(0, 255, 200, 0.4);
+}
+input:checked + .checkmark:before {
+  transform: translateX(18px);
+}
