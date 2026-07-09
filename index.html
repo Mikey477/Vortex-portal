@@ -1,539 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+
+  <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVENT HORIZON: Quantum Harvest</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>Untitled</title>
+    <link rel="stylesheet" href="./style.css">
 
-        body {
-            font-family: 'Courier New', monospace;
-            background: #0a0e27;
-            color: #00ff88;
-            overflow: hidden;
-            height: 100vh;
-        }
+  </head>
+    
+  <body>
+  <canvas id="vibeCanvas"></canvas>
 
-        canvas {
-            display: block;
-            background: radial-gradient(circle at center, #1a2a4a 0%, #0a0e27 100%);
-            cursor: crosshair;
-        }
+<!-- Glassmorphism Gear Menu Button -->
+<button id="settingsBtn" class="gear-btn" title="Open Settings">⚙️</button>
 
-        /* START MENU OVERLAY */
-        #menuOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 14, 39, 0.95);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            flex-direction: column;
-            gap: 30px;
-        }
-
-        #menuOverlay.hidden {
-            display: none;
-        }
-
-        #menuContent {
-            text-align: center;
-        }
-
-        #title {
-            font-size: 48px;
-            font-weight: bold;
-            color: #00ff88;
-            text-shadow: 0 0 20px #00ff88, 0 0 40px #0088ff;
-            margin-bottom: 40px;
-            letter-spacing: 3px;
-        }
-
-        #modeSelect {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        button {
-            padding: 12px 30px;
-            font-size: 16px;
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0088ff, #00ff88);
-            color: #0a0e27;
-            border: 2px solid #00ff88;
-            cursor: pointer;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: all 0.3s;
-            text-transform: uppercase;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #00ff88, 0 0 40px #0088ff;
-            background: linear-gradient(135deg, #00ff88, #0088ff);
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        #leaderboardBtn {
-            margin-top: 20px;
-        }
-
-        /* LEADERBOARD */
-        #leaderboard {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(10, 14, 39, 0.98);
-            border: 2px solid #00ff88;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 400px;
-            z-index: 1001;
-            display: none;
-            box-shadow: 0 0 30px #00ff88;
-        }
-
-        #leaderboard.show {
-            display: block;
-        }
-
-        #leaderboard h2 {
-            color: #0088ff;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 24px;
-        }
-
-        #leaderboardList {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .leaderboard-entry {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0, 255, 136, 0.2);
-            color: #00ff88;
-        }
-
-        .leaderboard-entry:nth-child(1) {
-            color: #ffd700;
-            font-weight: bold;
-        }
-
-        .leaderboard-entry:nth-child(2) {
-            color: #c0c0c0;
-        }
-
-        .leaderboard-entry:nth-child(3) {
-            color: #cd7f32;
-        }
-
-        #closeLeaderboard {
-            margin-top: 20px;
-            width: 100%;
-        }
-
-        /* SETTINGS MENU */
-        #settingsMenu {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(10, 14, 39, 0.98);
-            border: 2px solid #0088ff;
-            padding: 30px;
-            border-radius: 10px;
-            z-index: 1001;
-            display: none;
-            max-width: 500px;
-            box-shadow: 0 0 30px #0088ff;
-        }
-
-        #settingsMenu.show {
-            display: block;
-        }
-
-        #settingsMenu h2 {
-            color: #0088ff;
-            margin-bottom: 20px;
-            text-align: center;
-            font-size: 24px;
-        }
-
-        .settings-group {
-            margin-bottom: 20px;
-        }
-
-        .settings-label {
-            color: #00ff88;
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .settings-input {
-            width: 100%;
-            padding: 10px;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88;
-            color: #00ff88;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-        }
-
-        .settings-input:focus {
-            outline: none;
-            border-color: #0088ff;
-            background: rgba(0, 255, 136, 0.2);
-        }
-
-        #closeSettings {
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        /* HUD */
-        #hud {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            color: #00ff88;
-            font-size: 14px;
-            z-index: 500;
-            background: rgba(10, 14, 39, 0.8);
-            padding: 20px;
-            border: 1px solid #00ff88;
-            border-radius: 5px;
-            min-width: 200px;
-            display: none;
-        }
-
-        #hud.show {
-            display: block;
-        }
-
-        .hud-item {
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* GEAR BUTTON */
-        #gearBtn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            font-size: 28px;
-            background: rgba(0, 136, 255, 0.2);
-            border: 2px solid #0088ff;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 499;
-            display: none;
-            transition: all 0.3s;
-        }
-
-        #gearBtn.show {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #gearBtn:hover {
-            background: rgba(0, 136, 255, 0.4);
-            transform: rotate(20deg);
-        }
-
-        /* SIDE PANEL - UPGRADES */
-        #sidePanel {
-            position: fixed;
-            right: 20px;
-            top: 20px;
-            width: 300px;
-            background: rgba(10, 14, 39, 0.95);
-            border: 2px solid #0088ff;
-            border-radius: 5px;
-            padding: 20px;
-            z-index: 500;
-            max-height: 90vh;
-            overflow-y: auto;
-            display: none;
-        }
-
-        #sidePanel.show {
-            display: block;
-        }
-
-        .panel-title {
-            font-size: 18px;
-            color: #0088ff;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .upgrade-item {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .upgrade-item:hover {
-            background: rgba(0, 255, 136, 0.2);
-            transform: translateX(5px);
-        }
-
-        .upgrade-item.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            background: rgba(0, 255, 136, 0.05);
-        }
-
-        .upgrade-name {
-            font-weight: bold;
-            color: #00ff88;
-            margin-bottom: 5px;
-        }
-
-        .upgrade-cost {
-            font-size: 12px;
-            color: #0088ff;
-        }
-
-        .upgrade-description {
-            font-size: 11px;
-            color: #00ff88;
-            margin-top: 5px;
-            opacity: 0.8;
-        }
-
-        .dm-display {
-            text-align: center;
-            font-size: 16px;
-            color: #ffd700;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        /* GAME OVER SCREEN */
-        #gameOverScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 14, 39, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        #gameOverScreen.show {
-            display: flex;
-        }
-
-        .game-over-content {
-            text-align: center;
-        }
-
-        .game-over-content h1 {
-            font-size: 48px;
-            color: #00ff88;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px #00ff88;
-        }
-
-        .game-over-stats {
-            font-size: 20px;
-            color: #00ff88;
-            margin: 20px 0;
-        }
-
-        #retryBtn, #menuBtn {
-            margin-top: 20px;
-        }
-
-        /* VICTORY SCREEN */
-        #victoryScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 14, 39, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        #victoryScreen.show {
-            display: flex;
-        }
-
-        .victory-content h1 {
-            font-size: 48px;
-            color: #00ff88;
-            margin-bottom: 20px;
-            text-shadow: 0 0 20px #00ff88, 0 0 40px #0088ff;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-    </style>
-</head>
-<body>
-    <canvas id="gameCanvas"></canvas>
-
-    <!-- START MENU -->
-    <div id="menuOverlay">
-        <div id="menuContent">
-            <div id="title">EVENT HORIZON<br>Quantum Harvest</div>
-            <div id="modeSelect">
-                <button id="standardBtn">Standard Sector</button>
-                <button id="gravityBtn">Gravity Well</button>
-                <button id="sandboxBtn">Sandbox</button>
-            </div>
-            <button id="leaderboardBtn">Leaderboards</button>
-        </div>
+<!-- Upgraded Settings Dashboard -->
+<div id="settingsPanel" class="settings-panel hidden">
+  <div class="panel-header">
+    <h3>SWARM QUANTUM ENGINE</h3>
+    <button id="closeBtn" class="close-btn">&times;</button>
+  </div>
+  
+  <div class="panel-body">
+    <!-- Ball Number -->
+    <div class="control-group">
+      <label for="ballNumber">Ball Count: <span id="valCount">400</span></label>
+      <input type="range" id="ballNumber" min="10" max="1200" step="10" value="400">
     </div>
 
-    <!-- LEADERBOARD -->
-    <div id="leaderboard">
-        <h2>HIGH SCORES</h2>
-        <div id="leaderboardList"></div>
-        <button id="closeLeaderboard">Back to Menu</button>
+    <!-- Particle Radius Size -->
+    <div class="control-group">
+      <label for="ballSize">Ball Size Radius: <span id="valSize">2.0px</span></label>
+      <input type="range" id="ballSize" min="0.5" max="12" step="0.5" value="2">
     </div>
 
-    <!-- SETTINGS MENU (Sandbox) -->
-    <div id="settingsMenu">
-        <h2>SANDBOX SETTINGS</h2>
-        <div class="settings-group">
-            <label class="settings-label">Ball Number</label>
-            <input type="number" id="settingsBallNum" class="settings-input" value="50" min="1" max="500">
-        </div>
-        <div class="settings-group">
-            <label class="settings-label">Ball Speed</label>
-            <input type="number" id="settingsSpeed" class="settings-input" value="2" step="0.1" min="0.1" max="10">
-        </div>
-        <div class="settings-group">
-            <label class="settings-label">Gravity Strength (negative = repel)</label>
-            <input type="number" id="settingsGravity" class="settings-input" value="0.3" step="0.05" min="-2" max="2">
-        </div>
-        <button id="closeSettings">Close Settings</button>
+    <!-- Gravity Strength -->
+    <div class="control-group">
+      <label for="gravStrength">Gravity Strength: <span id="valStrength">1.0</span></label>
+      <input type="range" id="gravStrength" min="-2.5" max="3.0" step="0.1" value="1.0">
+      <span class="sub-hint">(Negative values push particles away)</span>
     </div>
 
-    <!-- HUD -->
-    <div id="hud">
-        <div class="hud-item">
-            <span>Mode:</span>
-            <span id="modeDisplay">-</span>
-        </div>
-        <div class="hud-item">
-            <span>Core Size:</span>
-            <span id="coreSize">-</span>
-        </div>
-        <div class="hud-item">
-            <span>Particles:</span>
-            <span id="particleCount">-</span>
-        </div>
-        <div class="hud-item">
-            <span>Absorbed:</span>
-            <span id="absorbed">-</span>
-        </div>
-        <div class="hud-item">
-            <span>Sector:</span>
-            <span id="sector">1</span>
-        </div>
-        <div class="hud-item">
-            <span>Time:</span>
-            <span id="timeDisplay">0s</span>
-        </div>
+    <!-- Maximum Vector Speed -->
+    <div class="control-group">
+      <label for="gravSpeed">Max Speed Velocity: <span id="valSpeed">8</span></label>
+      <input type="range" id="gravSpeed" min="2" max="25" step="1" value="8">
     </div>
 
-    <!-- GEAR BUTTON (Sandbox) -->
-    <button id="gearBtn">⚙️</button>
-
-    <!-- SIDE PANEL -->
-    <div id="sidePanel">
-        <div class="dm-display">
-            Dark Matter: <span id="dmAmount">0</span> DM
-        </div>
-        <div class="upgrade-item" id="upgrade1">
-            <div class="upgrade-name">Gravitational Pull</div>
-            <div class="upgrade-description">+10% Suction Speed</div>
-            <div class="upgrade-cost">Cost: 50 DM</div>
-        </div>
-        <div class="upgrade-item" id="upgrade2">
-            <div class="upgrade-name">Matter Replication</div>
-            <div class="upgrade-description">+5 Max Particles</div>
-            <div class="upgrade-cost">Cost: 100 DM</div>
-        </div>
-        <div class="upgrade-item" id="upgrade3">
-            <div class="upgrade-name">Shockwave Overdrive</div>
-            <div class="upgrade-description">+20% Shockwave Radius</div>
-            <div class="upgrade-cost">Cost: 150 DM</div>
-        </div>
+    <!-- Atmosphere Friction -->
+    <div class="control-group">
+      <label for="swarmFriction">Atmosphere Friction: <span id="valFriction">Medium</span></label>
+      <input type="range" id="swarmFriction" min="0.85" max="0.99" step="0.01" value="0.97">
     </div>
 
-    <!-- GAME OVER SCREEN -->
-    <div id="gameOverScreen">
-        <div class="game-over-content">
-            <h1>CORE COLLAPSED</h1>
-            <div class="game-over-stats">
-                <div>Final Score: <span id="finalScore">0</span></div>
-                <div>Dark Matter Earned: <span id="finalDM">0</span></div>
-                <div>Time Survived: <span id="survivalTime">0s</span></div>
-            </div>
-            <button id="retryBtn">Try Again</button>
-            <button id="menuBtn">Back to Menu</button>
-        </div>
+    <!-- Motion Blur Trails -->
+    <div class="control-group">
+      <label for="trailLength">Motion Blur Trails: <span id="valTrails">Long</span></label>
+      <input type="range" id="trailLength" min="0.05" max="0.5" step="0.05" value="0.2">
     </div>
 
-    <!-- VICTORY SCREEN -->
-    <div id="victoryScreen">
-        <div class="victory-content">
-            <h1>SECTOR STABILIZED!</h1>
-            <div class="game-over-stats">
-                <div>Score: <span id="victoryScore">0</span></div>
-                <div>Next Sector Loading...</div>
-            </div>
-        </div>
+    <!-- Laser Connectors Toggle Switch (Changed: Started Unchecked) -->
+    <div class="control-group checkbox-group">
+      <label class="toggle-container">
+        <span>Laser Connectors</span>
+        <input type="checkbox" id="toggleLines">
+        <span class="checkmark"></span>
+      </label>
     </div>
 
-    <script src="game.js"></script>
-</body>
+    <!-- Theme Palette Selector -->
+    <div class="control-group">
+      <label for="themePreset">Spectrum Theme Preset</label>
+      <select id="themePreset" class="custom-select">
+        <option value="cyber">Cyber Drift (Rainbow Shift)</option>
+        <option value="matrix">Matrix (Toxic Green)</option>
+        <option value="synth">Synthwave (Neon Fuchsia)</option>
+        <option value="deep">Deep Sea (Electric Cyan)</option>
+      </select>
+    </div>
+  </div>
+</div>
+    <script  src="./script.js"></script>
+
+  </body>
+  
 </html>
